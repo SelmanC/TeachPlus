@@ -1,0 +1,16 @@
+{
+  "parser": "babel-eslint",
+    "extends": [
+        "rallycoding"
+    ],
+    "rules": {
+        "arrow-body-style": 0,
+        "react/require-extension": "off",
+        "global-require": "off",
+        "react/jsx-closing-bracket-location": "off",
+        "dot-notation": "off",
+        "max-len": "off",
+        "no-continue": "off",
+        "no-prototype-builtins": "off"
+    }
+}
