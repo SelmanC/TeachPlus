@@ -25,7 +25,6 @@ class AllUserBadgeList extends Component {
 
     render() {
         const selectedItems = this.state.isContactModalShown ? this.state.selectedItems : this.props.selectedItems;
-
         return (
             <ModalWithHeader
                 headerText={this.props.title}

@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { connect } from 'react-redux';
 import { Fab, Icon } from 'native-base';
 import { SearchTextInput, FilteredList, GroupModal } from './components';
-import { GroupExpl } from './other';
+import { retriveAllGroups, addGroup, deleteGroup, retriveAllUsers } from './actions';
 
 const defaultSelectedItem = {
     id: null,
     name: '',
-    members: [],
-    role: { name: 'Gruppe', value: 'group', id: 5 }
+    groupOwner: [],
+    role: 'group'
 };
 
 class GroupList extends Component {
@@ -17,43 +18,34 @@ class GroupList extends Component {
 
         this.state = {
             modalVisible: false,
-            groupList: [],
             selectedItem: Object.assign({}, defaultSelectedItem),
-            selectedIndex: null,
             searchText: ''
         };
     }
 
     componentDidMount() {
-        this.setState({ groupList: GroupExpl });
+        this.props.retriveAllGroups();
+
+        if (this.props.userData.length === 0) {
+            this.props.retriveAllUsers();
+        }
     }
 
     onDelete() {
-        const { groupList, selectedIndex } = this.state;
-        groupList.splice(selectedIndex, 1);
+        this.props.deleteGroup(this.state.selectedItem, this.props.groupData);
 
         this.setState({
-            groupList,
             selectedItem: Object.assign({}, defaultSelectedItem),
             modalVisible: false,
-            selectedIndex: null
         });
     }
 
     onSave(newItem) {
-        const { selectedItem, groupList, selectedIndex } = this.state;
-
-        if (selectedItem.id) {
-            groupList[selectedIndex] = newItem;
-        } else {
-            groupList.push(newItem);
-        }
+        this.props.addGroup(newItem, this.props.groupData);
 
         this.setState({
-            groupList,
             selectedItem: Object.assign({}, defaultSelectedItem),
             modalVisible: false,
-            selectedIndex: null
         });
     }
 
@@ -69,11 +61,10 @@ class GroupList extends Component {
 
                     <ScrollView>
                         <FilteredList
-                            renderedItems={this.state.groupList}
-                            onItemPressed={(item, index) =>
+                            renderedItems={this.props.groupData}
+                            onItemPressed={(item) =>
                                 this.setState({
                                     selectedItem: item,
-                                    selectedIndex: index,
                                     modalVisible: true
                                 })
                             }
@@ -83,11 +74,11 @@ class GroupList extends Component {
                     <GroupModal
                         modalVisible={this.state.modalVisible}
                         selectedItem={this.state.selectedItem}
+                        users={this.props.userData}
                         onSave={(item) => this.onSave(item)}
                         onDelete={() => this.onDelete()}
                         onCancel={() => this.setState({
                             modalVisible: false,
-                            selectedIndex: null,
                             selectedItem: Object.assign({}, defaultSelectedItem)
                         })} />
                 </View>
@@ -107,4 +98,16 @@ class GroupList extends Component {
     }
 }
 
-export default GroupList;
+const mapStateToProps = state => {
+    return {
+        groupData: state.home.groupData,
+        userData: state.home.userData,
+    };
+};
+
+export default connect(mapStateToProps, {
+    retriveAllGroups,
+    addGroup,
+    deleteGroup,
+    retriveAllUsers
+})(GroupList);

@@ -27,7 +27,7 @@ class TimeSheetList extends Component {
         const { copyTimeSheetCell, timeSheets, popupTextInputValue } = this.state;
         let timeSheet = {};
         if (copyTimeSheetCell !== null) {
-            timeSheet = Object.assign({}, timeSheets[copyTimeSheetCell]);
+            timeSheet = Object.assign([], timeSheets[copyTimeSheetCell]);
             timeSheet.Name = popupTextInputValue;
             timeSheet.id = null;
         } else {

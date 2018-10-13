@@ -11,6 +11,8 @@
         "dot-notation": "off",
         "max-len": "off",
         "no-continue": "off",
-        "no-prototype-builtins": "off"
+        "no-prototype-builtins": "off",
+        "import/no-mutable-exports": "off",
+        "no-param-reassign": "off"
     }
 }

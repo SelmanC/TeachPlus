@@ -1,6 +1,5 @@
 export const getStringFromArray = (arr, type, seperator) => {
     let newString = '';
-    
     for (let i = 0; i < arr.length; i++) {
         if (i !== 0) newString += `${seperator} `;
         newString += arr[i][type];

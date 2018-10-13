@@ -1,17 +1,12 @@
 import React, { Component } from 'react';
-import { View, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, StyleSheet, TextInput } from 'react-native';
 import { FormInput, Icon, Divider, CheckBox } from 'react-native-elements';
-import { ListModal } from './ListModal';
 import { ModalWithHeader } from './ModalWithHeader';
-import { SubjectExpl } from '../other';
 
 const defaultSelectedHeader = {
     id: null,
     title: '',
-    subject: {
-        name: '',
-        id: null
-    },
+    subject: '',
     note: '',
     finished: false
 };
@@ -21,7 +16,6 @@ class NotizModal extends Component {
         super(props);
         this.state = {
             modalShown: false,
-            isSubjectChooserModalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedHeader)
         };
     }
@@ -86,18 +80,18 @@ class NotizModal extends Component {
 
                     <View style={styles.modalFormFieldContainerStyle}>
                         <Icon name='book' type='material-community' size={40} color='#a09f9f' />
-                        <TouchableOpacity
-                            onPress={() => this.setState({ isSubjectChooserModalVisible: true })}
-                            style={{ flex: 1 }}>
-                            <FormInput
-                                placeholder='Fach'
-                                value={selectedItem.subject.name}
-                                editable={false}
-                                pointerEvents="none"
-                                containerStyle={styles.containerFormInputStyle}
-                                placeholderTextColor='#828080'
-                                inputStyle={styles.formInputFieldStyle} />
-                        </TouchableOpacity>
+                        <FormInput
+                            placeholder='Fach'
+                            value={selectedItem.subject}
+                            onChangeText={(subject) => this.setState({
+                                selectedItem: {
+                                    ...this.state.selectedItem,
+                                    subject
+                                }
+                            })}
+                            containerStyle={styles.containerFormInputStyle}
+                            placeholderTextColor='#828080'
+                            inputStyle={styles.formInputFieldStyle} />
                     </View>
 
 
@@ -145,18 +139,6 @@ class NotizModal extends Component {
                     </View>
 
                 </View>
-
-                <ListModal
-                    isVisible={this.state.isSubjectChooserModalVisible}
-                    renderedItems={SubjectExpl}
-                    headerText='Fach wählen'
-                    onCancel={() => this.setState({ isSubjectChooserModalVisible: false })}
-                    onSave={(subjectData) => this.setState({
-                        selectedItem: {
-                            ...this.state.selectedItem, subject: subjectData
-                        },
-                        isSubjectChooserModalVisible: false
-                    })} />
 
             </ModalWithHeader >
         );

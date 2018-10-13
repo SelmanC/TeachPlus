@@ -1,18 +1,16 @@
 
 import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
+import { connect } from 'react-redux';
 import { List, ListItem, Avatar, Divider } from 'react-native-elements';
 import { Fab, Icon } from 'native-base';
 import { NotizModal } from './components';
-import { NotesDataExpl } from './other';
+import { retrieveNotes, addNotes, deleteNotes } from './actions';
 
 const defaultSelectedItem = {
     id: null,
     title: '',
-    subject: {
-        name: '',
-        id: null
-    },
+    subject: '',
     note: '',
     finished: false
 };
@@ -22,50 +20,35 @@ class NotizenList extends Component {
         super(props);
 
         this.state = {
-            notesData: [],
             modalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedItem)
         };
     }
 
     componentDidMount() {
-        this.setState({
-            notesData: NotesDataExpl
-        });
+        this.props.retrieveNotes(this.props.user.id);
     }
 
     onDelete() {
-        const { selectedItem, notesData } = this.state;
-        const noteIndex = notesData.findIndex(e => e.id === selectedItem.id);
-        notesData.splice(noteIndex, 1);
+        this.props.deleteNotes(this.state.selectedItem, this.props.notesData);
+
         this.setState({
-            notesData,
             modalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedItem)
         });
     }
 
     onSave(newSelectedItem) {
-        const { selectedItem, notesData } = this.state;
-
-        if (selectedItem.id) {
-            const noteIndex = notesData.findIndex(e => e.id === selectedItem.id);
-            notesData[noteIndex] = newSelectedItem;
-        } else {
-            notesData.push(newSelectedItem);
-        }
+        this.props.addNotes(newSelectedItem, this.props.notesData, this.props.user);
 
         this.setState({
-            notesData,
             modalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedItem)
         });
     }
 
     renderNotesList(finished, avatarColor) {
-        const { notesData } = this.state;
-
-        return notesData.filter(e => e.finished === finished).map((note, key) => (
+        return this.props.notesData.filter(e => e.finished === finished).map((note, key) => (
             <TouchableOpacity
                 key={key}
                 onPress={() => this.setState({
@@ -76,7 +59,7 @@ class NotizenList extends Component {
                     avatar={
                         <Avatar
                             medium
-                            title={note.subject.name ? note.subject.name.substring(0, 2).toUpperCase() : '/'}
+                            title={note.subject ? note.subject.substring(0, 2).toUpperCase() : '/'}
                             overlayContainerStyle={{ backgroundColor: avatarColor }}
                             activeOpacity={0.7}
                         />
@@ -96,7 +79,7 @@ class NotizenList extends Component {
                     }
                 </List>
                 {
-                    this.state.notesData.filter(e => e.finished).length > 0 &&
+                    this.props.notesData.filter(e => e.finished).length > 0 &&
                     <View>
                         <Text style={{ fontWeight: 'bold', marginLeft: 5, marginTop: 10, fontSize: 15 }}>Erledigt</Text>
 
@@ -135,4 +118,16 @@ class NotizenList extends Component {
     }
 }
 
-export default NotizenList;
+const mapStateToProps = state => {
+    return {
+        user: state.auth.user,
+        showSpinner: state.home.showSpinner,
+        notesData: state.home.notesData
+    };
+};
+
+export default connect(mapStateToProps, {
+    retrieveNotes,
+    addNotes,
+    deleteNotes
+})(NotizenList);

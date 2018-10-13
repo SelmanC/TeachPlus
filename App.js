@@ -1,14 +1,22 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
+import ReduxThunk from 'redux-thunk';
 import { RootRouter } from './src/Router';
+import reducers from './src/reducers';
 
 class App extends Component {
   render() {
+    const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
+    
     return (
-      <View style={styles.appStyle}>
-         <StatusBar barStyle="light-content" />
-        <RootRouter />
-      </View>
+      <Provider store={store}>
+        <View style={styles.appStyle}>
+          <StatusBar barStyle="light-content" />
+          <RootRouter />
+        </View>
+      </Provider>
     );
   }
 }

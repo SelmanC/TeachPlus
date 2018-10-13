@@ -14,12 +14,16 @@ class InputField extends Component {
     }
 
     render() {
-        const { Name, onChangeText, style, value } = this.props;
+        const { Name, onChangeText, style, value, secureTextEntry } = this.props;
 
         return (
             <View >
                 <FormLabel>{Name}</FormLabel>
-                <FormInput onChangeText={onChangeText} containerStyle={style} value={value} />
+                <FormInput 
+                    onChangeText={onChangeText} 
+                    containerStyle={style} 
+                    value={value} 
+                    secureTextEntry={secureTextEntry} />
                 {this.showValidationMessage()}
             </View>
         );

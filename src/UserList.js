@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { View, TouchableOpacity } from 'react-native';
+import { connect } from 'react-redux';
 import { Fab, Icon } from 'native-base';
 import { UserSearchList, UserModal } from './components';
-import { UsersExpl } from './other';
+import { retriveAllUsers, addUser, deleteUser } from './actions';
+
 
 const defaultSelectedItem = {
     id: null,
@@ -12,7 +14,7 @@ const defaultSelectedItem = {
     ort: '',
     land: '',
     email: '',
-    role: { name: '', value: '', id: null },
+    role: '',
     children: []
 };
 
@@ -22,39 +24,27 @@ class UserList extends Component {
 
         this.state = {
             modalVisible: false,
-            personList: [],
             selectedItem: Object.assign({}, defaultSelectedItem)
         };
     }
 
     componentDidMount() {
-        this.setState({ personList: UsersExpl });
+        this.props.retriveAllUsers();
     }
 
     onDelete() {
-        const { selectedItem, personList } = this.state;
-        const itemIndex = personList.findIndex(e => e.id === selectedItem.id);
-        personList.splice(itemIndex, 1);
+        this.props.deleteUser(this.state.selectedItem, this.props.userData);
 
         this.setState({
-            personList,
             selectedItem: Object.assign({}, defaultSelectedItem),
             modalVisible: false
         });
     }
 
     onSave(newItem) {
-        const { selectedItem, personList } = this.state;
-
-        if (selectedItem.id) {
-            const itemIndex = personList.findIndex(e => e.id === selectedItem.id);
-            personList[itemIndex] = newItem;
-        } else {
-            personList.push(newItem);
-        }
+        this.props.addUser(newItem, this.props.userData);
 
         this.setState({
-            personList,
             selectedItem: Object.assign({}, defaultSelectedItem),
             modalVisible: false
         });
@@ -64,7 +54,7 @@ class UserList extends Component {
         return (
             <View style={{ flex: 1 }}>
                 <UserSearchList
-                    personList={this.state.personList}
+                    personList={this.props.userData}
                     searchGroup={false}
                     onUserClicked={(item) =>
                         this.setState({
@@ -80,7 +70,8 @@ class UserList extends Component {
                     })}
                     onDelete={() => { this.onDelete(); }}
                     onSave={(selectedItem) => { this.onSave(selectedItem); }}
-                    selectedItem={this.state.selectedItem} />
+                    selectedItem={this.state.selectedItem} 
+                    childrenData={this.props.userData.filter(e => e.role === 'student')} />
 
                 <Fab
                     active
@@ -97,4 +88,14 @@ class UserList extends Component {
     }
 }
 
-export default UserList;
+const mapStateToProps = state => {
+    return {
+        userData: state.home.userData,
+    };
+};
+
+export default connect(mapStateToProps, {
+    retriveAllUsers,
+    addUser,
+    deleteUser
+})(UserList);

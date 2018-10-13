@@ -11,9 +11,10 @@ const slideAnimation = new SlideAnimation({
 
 const defaultValue = {
     selectedOption: null,
-    minutes: null,
-    comment: null,
-    absenceValue: null
+    minutes: '',
+    comment: '',
+    type: '',
+    id: null
 };
 
 class AbsencePopup extends Component {
@@ -40,15 +41,15 @@ class AbsencePopup extends Component {
     }
 
     setPopupEntschuldigtOption() {
-        this.setState({ absenceValue: this.state.absenceValue === 'E' ? '' : 'E' });
+        this.setState({ type: this.state.type === 'E' ? '' : 'E' });
     }
 
-    setNewAbsenceValue() {
-        const { minutes, selectedOption, absenceValue, comment } = this.state;
-        const data = { type: segmentMap[selectedOption].val, comment };
+    setNewTypeValue() {
+        const { minutes, selectedOption, type, comment, id } = this.state;
+        const data = { type: segmentMap[selectedOption].val, comment, id };
         if (segmentMap[selectedOption].val === 'VP') {
             data['minutes'] = minutes;
-        } else if (segmentMap[selectedOption].val === 'F' && absenceValue === 'E') {
+        } else if (segmentMap[selectedOption].val === 'F' && type === 'E') {
             data['type'] = 'E';
         }
         this.props.onAbsenceChanged(data);
@@ -58,7 +59,7 @@ class AbsencePopup extends Component {
     }
 
     renderPopupFields() {
-        const { selectedOption, minutes, absenceValue } = this.state;
+        const { selectedOption, minutes, type } = this.state;
 
         if (segmentOptions[selectedOption] === 'Verspätung') {
             return (
@@ -79,7 +80,7 @@ class AbsencePopup extends Component {
                     <CheckBox
                         center
                         title='Entschuldigt'
-                        checked={absenceValue === 'E'}
+                        checked={type === 'E'}
                         onPress={this.setPopupEntschuldigtOption.bind(this)}
                     />
                 </View>
@@ -93,14 +94,16 @@ class AbsencePopup extends Component {
                 dialogTitle={<DialogTitle title={this.getPopupTitle()} />}
                 ref={(popupDialog) => this.props.onRef(popupDialog)}
                 dialogAnimation={slideAnimation}
+                dismissOnTouchOutside={false}
                 onDismissed={() => this.setState({ ...defaultValue })}
                 height={0.7}
                 onShown={() => this.setState({
                     selectedOption: this.props.selectedCell.selectedOption,
                     comment: this.props.selectedCell.comment,
-                    absenceValue: this.props.selectedCell.absenceValue,
+                    type: this.props.selectedCell.type,
                     subject: this.props.selectedCell.subject,
-                    minutes: this.props.selectedCell.minutes
+                    minutes: this.props.selectedCell.minutes,
+                    id: this.props.selectedCell.id
                 })}
             >
                 <View style={{ paddingTop: 10, paddingBottom: 10, flex: 1 }}>
@@ -137,7 +140,7 @@ class AbsencePopup extends Component {
                                 backgroundColor='#4C3E54'
                                 color='white'
                                 textStyle={{ fontWeight: 'bold', fontSize: 14 }}
-                                onPress={this.setNewAbsenceValue.bind(this)} />
+                                onPress={this.setNewTypeValue.bind(this)} />
                             <Button
                                 title='Abbrechen'
                                 rounded

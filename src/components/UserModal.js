@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { connect } from 'react-redux';
 import { FormInput, Icon, Avatar } from 'react-native-elements';
 import { ListModal } from './ListModal';
 import { ModalWithHeader } from './ModalWithHeader';
 import { FilteredBadgeList } from './FilteredBadgeList';
-import { UserRoles, UsersExpl, getStringFromArray } from '../other';
+import { UserRoles, getStringFromArray } from '../other';
+import { retriveChildren } from '../actions';
 
 const defaultSelectedHeader = {
     id: null,
@@ -15,11 +17,11 @@ const defaultSelectedHeader = {
     strasse: '',
     ort: '',
     land: '',
-    role: { name: '', value: '', id: null },
+    role: '',
     children: []
 };
 
-class UserModal extends Component {
+class UserModalWrapped extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -27,12 +29,7 @@ class UserModal extends Component {
             isRoleModalVisible: false,
             isChildModalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedHeader),
-            children: []
         };
-    }
-
-    componentDidMount() {
-        this.setState({ children: UsersExpl.filter(e => e.role.value === 'student') });
     }
 
     onDelete() {
@@ -61,15 +58,23 @@ class UserModal extends Component {
 
     render() {
         const selectedItem = this.state.modalShown ? this.state.selectedItem : this.props.selectedItem;
+        const children = selectedItem.children ? selectedItem.children : this.props.children;
+
         return (
             <ModalWithHeader
                 headerText='Benutzer'
                 isVisible={this.props.modalVisible}
                 renderHeaderDeleteButton={this.props.renderHeaderDeleteButton !== false && selectedItem.id}
-                onShow={() => this.setState({
-                    selectedItem: Object.assign({}, this.props.selectedItem),
-                    modalShown: true
-                })}
+                onShow={() => {
+                    if (this.props.selectedItem.role === 'parent' && this.props.selectedItem.id) {
+                        this.props.retriveChildren(this.props.selectedItem.id);
+                    }
+
+                    this.setState({
+                        selectedItem: Object.assign({}, this.props.selectedItem),
+                        modalShown: true
+                    });
+                }}
                 onCancel={() => this.onCancel()}
                 onSave={() => this.onSave()}
                 onDelete={() => this.onDelete()}>
@@ -137,7 +142,7 @@ class UserModal extends Component {
                     </View>
 
                     <View style={styles.modalFormFieldContainerStyle}>
-                            
+
                         <Icon name="location-pin" type='entypo' size={40} color='#a09f9f' containerStyle={{ alignSelf: 'flex-start' }} />
                         <View style={{ flex: 1, height: 130, marginLeft: 10 }}>
                             <FormInput
@@ -189,7 +194,7 @@ class UserModal extends Component {
                             style={{ flex: 1 }}>
                             <FormInput
                                 placeholder='Rolle'
-                                value={selectedItem.role.name}
+                                value={selectedItem.role}
                                 editable={false}
                                 pointerEvents="none"
                                 containerStyle={styles.containerFormInputStyle}
@@ -198,7 +203,7 @@ class UserModal extends Component {
                         </TouchableOpacity>
                     </View>
                     {
-                        selectedItem.role.value === 'parent' &&
+                        selectedItem.role === 'parent' &&
 
                         <View style={styles.modalFormFieldContainerStyle}>
                             <Icon name='child' type='font-awesome' size={50} color='#a09f9f' />
@@ -208,7 +213,7 @@ class UserModal extends Component {
                                 style={{ flex: 1 }}>
                                 <FormInput
                                     placeholder='Kinder'
-                                    value={getStringFromArray(selectedItem.children, 'name', ',')}
+                                    value={getStringFromArray(children, 'name', ',')}
                                     editable={false}
                                     pointerEvents="none"
                                     containerStyle={styles.containerFormInputStyle}
@@ -225,24 +230,30 @@ class UserModal extends Component {
                     renderedItems={UserRoles}
                     headerText='Rolle wählen'
                     onCancel={() => this.setState({ isRoleModalVisible: false })}
-                    onSave={(roleData) => this.setState({
-                        selectedItem: {
-                            ...this.state.selectedItem, role: roleData
-                        },
-                        isRoleModalVisible: false
-                    })} />
+                    onSave={(roleData) => {
+                        if (roleData.value === 'parent' && selectedItem.id) {
+                            this.props.retriveChildren(selectedItem.id);
+                        }
+
+                        this.setState({
+                            selectedItem: {
+                                ...this.state.selectedItem, role: roleData.value
+                            },
+                            isRoleModalVisible: false
+                        });
+                    }} />
 
                 <FilteredBadgeList
                     isVisible={this.state.isChildModalVisible}
-                    renderedItems={this.state.children}
-                    selectedItems={this.state.selectedItem.children}
+                    renderedItems={this.props.childrenData}
+                    selectedItems={children}
                     title='Kinder auswählen'
                     onCancel={() => this.setState({
                         isChildModalVisible: false
                     })}
-                    onSave={(children) => this.setState({
+                    onSave={(newChildren) => this.setState({
                         isChildModalVisible: false,
-                        selectedItem: { ...selectedItem, children }
+                        selectedItem: { ...selectedItem, children: newChildren }
                     })} />
 
             </ModalWithHeader>
@@ -275,5 +286,14 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
 });
+const mapStateToProps = state => {
+    return {
+        children: state.home.currChildren
+    };
+};
+
+const UserModal = connect(mapStateToProps, {
+    retriveChildren
+})(UserModalWrapped);
 
 export { UserModal };

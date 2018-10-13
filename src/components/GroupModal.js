@@ -3,13 +3,13 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { FormInput, Icon, Avatar } from 'react-native-elements';
 import { ModalWithHeader } from './ModalWithHeader';
 import { AllUserBadgeList } from './AllUserBadgeList';
-import { UsersExpl, getStringFromArray } from '../other';
+import { getStringFromArray } from '../other';
 
 const defaultSelectedHeader = {
     id: null,
     name: '',
-    role: { name: 'Grupper', value: 'group', id: 5 },
-    members: []
+    role: 'group',
+    groupOwner: [],
 };
 
 class GroupModal extends Component {
@@ -19,12 +19,7 @@ class GroupModal extends Component {
             modalShown: false,
             isMemberModalVisible: false,
             selectedItem: Object.assign({}, defaultSelectedHeader),
-            users: []
         };
-    }
-
-    componentDidMount() {
-        this.setState({ users: UsersExpl });
     }
 
     onDelete() {
@@ -51,8 +46,24 @@ class GroupModal extends Component {
         this.props.onCancel();
     }
 
+    onSelectedBadgeChanged(selectedItem, members) {
+        selectedItem.groupOwner = [];
+        for (let i = 0; i < members.length; i++) {
+            delete members[i].groupMembers;
+            selectedItem.groupOwner.push({
+                userMember: members[i]
+            });
+        }
+
+        this.setState({
+            isMemberModalVisible: false,
+            selectedItem: { ...selectedItem }
+        });
+    }
+
     render() {
         const selectedItem = this.state.modalShown ? this.state.selectedItem : this.props.selectedItem;
+        const members = selectedItem.groupOwner.length > 0 ? selectedItem.groupOwner.map(e => e.userMember) : [];
         return (
             <ModalWithHeader
                 headerText='Gruppe'
@@ -98,7 +109,7 @@ class GroupModal extends Component {
                             style={{ flex: 1 }}>
                             <FormInput
                                 placeholder='Mitglieder'
-                                value={getStringFromArray(selectedItem.members, 'name', ',')}
+                                value={getStringFromArray(members, 'name', ',')}
                                 editable={false}
                                 pointerEvents="none"
                                 containerStyle={styles.containerFormInputStyle}
@@ -111,16 +122,13 @@ class GroupModal extends Component {
 
                 <AllUserBadgeList
                     isVisible={this.state.isMemberModalVisible}
-                    personList={this.state.users}
-                    selectedItems={this.state.selectedItem.members}
+                    personList={this.props.users}
+                    selectedItems={members}
                     title='Mitglieder auswählen'
                     onCancel={() => this.setState({
                         isMemberModalVisible: false
                     })}
-                    onSave={(members) => this.setState({
-                        isMemberModalVisible: false,
-                        selectedItem: { ...selectedItem, members }
-                    })} />
+                    onSave={(newMembers) => this.onSelectedBadgeChanged(selectedItem, newMembers)} />
 
             </ModalWithHeader>
         );

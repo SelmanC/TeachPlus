@@ -3,12 +3,12 @@ import { Modal, View, TouchableOpacity } from 'react-native';
 import { Header, Icon, } from 'react-native-elements';
 
 class ModalWithHeader extends Component {
-    renderHeaderRightButtons() {
-        if (this.props.renderHeaderRighItem !== false) {
+    renderHeaderRightButtons(renderHeaderDeleteButton, renderHeaderRighItem) {
+        if (renderHeaderRighItem !== false) {
             return (
                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
                     {
-                        this.props.renderHeaderDeleteButton && 
+                        renderHeaderDeleteButton &&
                         <TouchableOpacity
                             onPress={() => this.props.onDelete()} >
                             <Icon name='delete' size={30} color='white' containerStyle={{ marginRight: 10 }} />
@@ -26,9 +26,9 @@ class ModalWithHeader extends Component {
         return <View />;
     }
 
-    renderLeftIcon() {
-        if (this.props.leftIcon) {
-            return this.props.leftIcon;
+    renderLeftIcon(leftIcon) {
+        if (leftIcon) {
+            return leftIcon;
         }
 
         return (
@@ -41,7 +41,7 @@ class ModalWithHeader extends Component {
     }
 
     render() {
-        const { isVisible, onCancel, headerText, onDismiss, onShow } = this.props;
+        const { isVisible, onCancel, headerText, onDismiss, onShow, renderHeaderDeleteButton, renderHeaderRighItem, leftIcon } = this.props;
 
         return (
             <Modal
@@ -50,7 +50,7 @@ class ModalWithHeader extends Component {
                 visible={isVisible}
                 onDismiss={() => {
                     if (onDismiss) onDismiss();
-                }} 
+                }}
                 onShow={() => {
                     if (onShow) onShow();
                 }}>
@@ -60,12 +60,12 @@ class ModalWithHeader extends Component {
                         <TouchableOpacity
                             onPress={() => onCancel()}>
                             {
-                                this.renderLeftIcon()
+                                this.renderLeftIcon(leftIcon)
                             }
                         </TouchableOpacity>
                     )}
                     centerComponent={{ text: headerText, style: { color: 'white', fontWeight: 'bold', fontSize: 20 } }}
-                    rightComponent={this.renderHeaderRightButtons()}
+                    rightComponent={this.renderHeaderRightButtons(renderHeaderDeleteButton, renderHeaderRighItem)}
                 />
                 {this.props.children}
             </Modal>

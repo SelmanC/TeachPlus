@@ -15,7 +15,7 @@ class UserSearchList extends Component {
 
     filterList(item, option) {
         const onFilter = this.props.onFilterList ? this.props.onFilterList(item, option) : true;
-        return item.role.value === option && onFilter;
+        return item.role === option && onFilter;
     }
 
     render() {

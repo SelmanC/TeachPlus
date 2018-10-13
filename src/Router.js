@@ -177,6 +177,7 @@ const HomeTabNavigation = createMaterialTopTabNavigator({
             activeTintColor: 'white',
             labelStyle: {
                 fontSize: 12,
+                fontWeight: '500'
             },
             style: {
                 backgroundColor: '#4C3E54'

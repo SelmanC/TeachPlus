@@ -1,24 +1,31 @@
 import React, { Component } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
+import { connect } from 'react-redux';
 import { Card, Button } from 'react-native-elements';
-import { InputField, TextLink } from './components';
+import { loginUser } from './actions';
+import { InputField } from './components';
 
 class LoginForm extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            Name: '',
-            Password: ''
+            email: '',
+            password: ''
         };
     }
 
-    onNameChange(Name) {
-        this.setState({ Name });
+    onEmailChange(email) {
+        this.setState({ email });
     }
 
-    onPasswordChange(Password) {
-        this.setState({ Password });
+    onPasswordChange(password) {
+        this.setState({ password });
+    }
+
+    onButtonPressed() {
+        const { email, password } = this.state;
+        this.props.loginUser(email, password, this.props.workSpaceId, this.props.navigation);
     }
 
     render() {
@@ -32,24 +39,22 @@ class LoginForm extends Component {
                     />
                     <InputField
                         Name="Email"
-                        onChangeText={this.onNameChange.bind(this)}
-                        style={styles.inputFieldStyle} 
-                        value={this.state.Name} />
+                        onChangeText={this.onEmailChange.bind(this)}
+                        value={this.state.email} />
+                        
                     <InputField
                         Name="Password"
-                        onChangeText={this.onNameChange.bind(this)}
-                        style={styles.inputFieldStyle} 
-                        value={this.state.Password} />
+                        onChangeText={this.onPasswordChange.bind(this)}
+                        value={this.state.password} 
+                        error={this.props.error} 
+                        secureTextEntry />
                     <Button
                         title='Login'
                         rounded
                         backgroundColor='#00235b'
+                        style={{ marginTop: 10 }}
                         textStyle={{ fontWeight: 'bold' }}
-                        onPress={() => this.props.navigation.navigate('Main')} />
-                   { false &&
-                        <TextLink
-                        onPress={() => {}}
-                        title='Password vergessen?' />}
+                        onPress={this.onButtonPressed.bind(this)} />
                 </Card>
             </View>
         );
@@ -62,10 +67,17 @@ const styles = StyleSheet.create({
     },
     imageStyle: {
         alignSelf: 'center'
-    },
-    inputFieldStyle: {
-        marginBottom: 10
     }
 });
 
-export default LoginForm;
+const mapStateToProps = state => {
+    return {
+        showSpinner: state.auth.showSpinner,
+        workSpaceId: state.auth.workSpace.id,
+        error: state.auth.error,
+        email: state.auth.email,
+        password: state.auth.password
+    };
+};
+
+export default connect(mapStateToProps, { loginUser })(LoginForm);

@@ -5,17 +5,17 @@ import { Picker, Item } from 'native-base';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { ListModal } from './ListModal';
 import { ModalWithHeader } from './ModalWithHeader';
-import { ClassesExpl, TeacherExpl, SubjectExpl, createTerminString } from '../other';
+import { createTerminString } from '../other';
 
 const titles = [
-    'Vertetung',
+    'Vertretung',
     'Verspätung',
     'Ausfall',
     'Raumänderung'
 ];
 
 const defaultSelectedHeader = {
-    class: {
+    groupClass: {
         name: '',
         id: null
     },
@@ -23,16 +23,13 @@ const defaultSelectedHeader = {
     substitute: {
         name: ''
     },
-    subject: {
-        name: '',
-        id: null,
-        row: null
-    },
+    subject: '',
     room: '',
     comment: '',
     delay: null,
     date: new Date(),
-    id: null
+    id: null,
+    hour: ''
 };
 
 class VertretungsModal extends Component {
@@ -43,7 +40,6 @@ class VertretungsModal extends Component {
             isDelayTimerVisible: false,
             isClassChooserModalVisible: false,
             isTeacherChooserModalVisible: false,
-            isSubjectChooserModalVisible: false,
             isDatePickerVisible: false,
             selectedItem: Object.assign({}, defaultSelectedHeader)
         };
@@ -76,8 +72,8 @@ class VertretungsModal extends Component {
     renderFields(selectedItem) {
         if (selectedItem.title &&
             selectedItem.title !== 'Ausfall' &&
-            selectedItem.class.id &&
-            selectedItem.subject.id) {
+            selectedItem.groupClass.id &&
+            selectedItem.subject) {
             return (
                 <View style={{ flex: 1 }}>
 
@@ -213,7 +209,7 @@ class VertretungsModal extends Component {
                             style={{ flex: 1 }}>
                             <FormInput
                                 placeholder='Klasse'
-                                value={selectedItem.class.name}
+                                value={selectedItem.groupClass.name}
                                 editable={false}
                                 pointerEvents="none"
                                 containerStyle={styles.containerFormInputStyle}
@@ -242,18 +238,34 @@ class VertretungsModal extends Component {
                     <View style={styles.modalFormFieldContainerStyle}>
                         <Icon name='book' type='material-community' size={40} color='#a09f9f' />
                         <Icon name='star' type='entypo' size={10} color='red' />
-                        <TouchableOpacity
-                            onPress={() => this.setState({ isSubjectChooserModalVisible: true })}
-                            style={{ flex: 1 }}>
-                            <FormInput
-                                placeholder='Fach'
-                                value={selectedItem.subject.name}
-                                editable={false}
-                                pointerEvents="none"
-                                containerStyle={styles.containerFormInputStyle}
-                                placeholderTextColor='#828080'
-                                inputStyle={styles.formInputFieldStyle} />
-                        </TouchableOpacity>
+                        <FormInput
+                            placeholder='Fach'
+                            onChangeText={(subject) => this.setState({
+                                selectedItem: {
+                                    ...this.state.selectedItem,
+                                    subject
+                                }
+                            })}
+                            value={selectedItem.subject}
+                            containerStyle={styles.containerFormInputStyle}
+                            placeholderTextColor='#828080'
+                            inputStyle={styles.formInputFieldStyle} />
+                    </View>
+
+                    <View style={styles.modalFormFieldContainerStyle}>
+                        <Icon name='clock' type='evilicon' size={40} color='#a09f9f' />
+                        <FormInput
+                            placeholder='Unterrichtsstunde'
+                            onChangeText={(hour) => this.setState({
+                                selectedItem: {
+                                    ...this.state.selectedItem,
+                                    hour
+                                }
+                            })}
+                            value={selectedItem.hour}
+                            containerStyle={styles.containerFormInputStyle}
+                            placeholderTextColor='#828080'
+                            inputStyle={styles.formInputFieldStyle} />
                     </View>
 
                     {
@@ -284,19 +296,19 @@ class VertretungsModal extends Component {
 
                 <ListModal
                     isVisible={this.state.isClassChooserModalVisible}
-                    renderedItems={ClassesExpl}
+                    renderedItems={this.props.groups}
                     headerText='Klasse wählen'
                     onCancel={() => this.setState({ isClassChooserModalVisible: false })}
                     onSave={(classData) => this.setState({
                         selectedItem: {
-                            ...this.state.selectedItem, class: classData
+                            ...this.state.selectedItem, groupClass: classData
                         },
                         isClassChooserModalVisible: false
                     })} />
 
                 <ListModal
                     isVisible={this.state.isTeacherChooserModalVisible}
-                    renderedItems={TeacherExpl}
+                    renderedItems={this.props.teachers}
                     headerText='Lehrer wählen'
                     onCancel={() => this.setState({ isTeacherChooserModalVisible: false })}
                     onSave={(teacherData) => this.setState({
@@ -305,19 +317,6 @@ class VertretungsModal extends Component {
                         },
                         isTeacherChooserModalVisible: false
                     })} />
-
-                <ListModal
-                    isVisible={this.state.isSubjectChooserModalVisible}
-                    renderedItems={SubjectExpl}
-                    headerText='Fach wählen'
-                    onCancel={() => this.setState({ isSubjectChooserModalVisible: false })}
-                    onSave={(subjectData) => this.setState({
-                        selectedItem: {
-                            ...this.state.selectedItem, subject: subjectData
-                        },
-                        isSubjectChooserModalVisible: false
-                    })} />
-
             </ModalWithHeader >
         );
     }

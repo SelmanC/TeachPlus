@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { connect } from 'react-redux';
 import { Table, TableWrapper, Row, Col, Cell } from 'react-native-table-component';
 import { Picker, Icon, Item } from 'native-base';
 import { AbsencePopup } from './components';
-import { getDaysInMonth, getDateObjectByMonth, segmentMap, segmentOptions, months, absenceData } from './other';
+import { getDaysInMonth, getDateObjectByMonth, segmentMap, segmentOptions, months } from './other';
+import { retrieveAbsenceList, updateAbsenceData } from './actions';
 
 const titleWidth = 120;
 const dataWidth = 50;
@@ -11,11 +13,12 @@ const dataHeight = 50;
 
 const defaultSelectedCellValue = {
     studentIndex: null,
-    dayIndex: null,
+    day: null,
     selectedOption: 0,
-    absenceValue: '',
+    type: '',
     minutes: '',
     comment: '',
+    id: null
 };
 
 class AbsenceForm extends Component {
@@ -23,84 +26,72 @@ class AbsenceForm extends Component {
         super(props);
 
         this.state = {
-            students: [],
+            currMonthVal: null,
             month: null,
             days: [],
-            absence: [],
-            absenceData: {},
             headWidthArr: [],
-            headerHeightArr: [],
             selectedCell: defaultSelectedCellValue
         };
     }
 
     componentDidMount() {
-        const students = absenceData.students.map(student => student.name);
         const currMonth = new Date();
 
-        this.setState({ ...this.updateTableData(currMonth, absenceData), students: [' ', ...students], absenceData });
+        this.setState({ ...this.updateTableData(currMonth) });
         this.scrollToToday();
     }
 
-    setNewAbsenceValue(newData) {
-        const { absence, selectedCell } = this.state;
+    setNewTypeValue(newData) {
+        const { selectedCell, currMonthVal } = this.state;
+        newData.student = this.props.students[selectedCell.studentIndex];
+        
+        newData.month = currMonthVal;
+        newData.day = selectedCell.day + 1;
+        delete newData.selectedOption;
+        delete newData.student['groupMembers'];
 
-        absence[selectedCell.studentIndex][selectedCell.dayIndex] = newData;
-        this.setState({ absence, selectedCell: defaultSelectedCellValue });
+        this.props.updateAbsenceData(this.props.currAbsenceList, this.props.currAbsence, newData, selectedCell.studentIndex, selectedCell.day);
         this.popupDialog.dismiss();
     }
 
     getSelectedStudentName() {
-        return this.state.students[this.state.selectedCell.studentIndex + 1];
+        return this.props.students[this.state.selectedCell.studentIndex + 1];
     }
 
     getSelectedDay() {
-        return this.state.days[this.state.selectedCell.dayIndex];
+        return this.state.days[this.state.selectedCell.day];
+    }
+
+    getAllStudentNames() {
+        return ['', ...this.props.students.map(e => `${e.name} ${e.lastname}`)];
     }
 
     updateMonthAndTableData(monthOption) {
         const monthIndex = months.findIndex(e => e.label === monthOption);
         const date = getDateObjectByMonth(monthIndex);
-        this.setState({ ...this.updateTableData(date, this.state.absenceData) });
+
+        const daysInMonth = getDaysInMonth(date.getMonth(), date.getFullYear());
+        this.props.retrieveAbsenceList(this.props.currAbsenceList, date, daysInMonth);
+
+        this.setState({ ...this.updateTableData(date) });
     }
 
-    updateTableData(currMonth, tableData) {
-        const actualMonth = new Date().getMonth();
-        const currday = currMonth.getDate();
+    updateTableData(currMonth) {
         const daysInMonth = getDaysInMonth(currMonth.getMonth(), currMonth.getFullYear());
         const headWidthArr = [];
-        const absence = [];
         const daysArr = [];
-        const headerHeightArr = [];
 
         for (let i = 1; i <= daysInMonth; i++) {
             daysArr.push(`${i}`);
             headWidthArr.push(dataWidth);
         }
 
-        tableData.students.forEach((student, index) => {
-            absence.push([]);
-            headerHeightArr.push(dataHeight);
-
-            for (let i = 0; i < daysInMonth; i++) {
-                const type = (i < currday && currMonth.getMonth() === actualMonth) || currMonth.getMonth() < actualMonth ?
-                    'A' : '/';
-                absence[index].push({ type });
-            }
-
-            for (let i = 0; i < student.absences.length; i++) {
-                if (currMonth.getMonth() !== student.absences[i].month - 1) continue;
-                absence[index][student.absences[i].day - 1] = student.absences[i];
-            }
-        });
-
         return {
+            currMonthVal: currMonth.getMonth() + 1,
             month: months[currMonth.getMonth()].label,
             days: daysArr,
-            absence,
             headWidthArr,
-            headerHeightArr,
-            selectedCell: defaultSelectedCellValue
+            selectedCell: Object.assign({}, defaultSelectedCellValue)
         };
     }
 
@@ -109,7 +100,7 @@ class AbsenceForm extends Component {
         this.scroller.scrollTo({ x: today * dataWidth, y: 0 });
     }
 
-    showPopupDialog(cellData, studentIndex, dayIndex) {
+    showPopupDialog(cellData, studentIndex, day) {
         const type = cellData.type === '/' ? 'A' : cellData.type;
 
         let segmentLabel = '';
@@ -124,11 +115,12 @@ class AbsenceForm extends Component {
         const absenceIndex = segmentOptions.indexOf(segmentLabel);
         const selectedCell = {
             studentIndex,
-            dayIndex,
-            absenceValue: cellData.type,
+            day,
+            type: cellData.type,
             selectedOption: absenceIndex,
             minutes: cellData['minutes'],
-            comment: cellData['comment']
+            comment: cellData['comment'],
+            id: cellData['id']
         };
         this.setState({ selectedCell });
         this.popupDialog.show();
@@ -137,7 +129,7 @@ class AbsenceForm extends Component {
     renderCells() {
         const date = new Date();
         const today = date.getDate();
-        return this.state.absence.map((rowData, index) => (
+        return this.props.currAbsence.map((rowData, index) => (
             <TableWrapper
                 key={index}
                 style={styles.wrapper}
@@ -196,7 +188,7 @@ class AbsenceForm extends Component {
                     student={this.getSelectedStudentName()}
                     selectedDay={this.getSelectedDay()}
                     selectedMonth={this.state.month}
-                    onAbsenceChanged={this.setNewAbsenceValue.bind(this)}
+                    onAbsenceChanged={this.setNewTypeValue.bind(this)}
                     onRef={(popupDialog) => { this.popupDialog = popupDialog; }}
                     onCancelPressed={() => this.popupDialog.dismiss()} />
 
@@ -205,10 +197,10 @@ class AbsenceForm extends Component {
                     <View style={styles.wrapper}>
                         <Table borderStyle={{ borderColor: 'black' }} style={{ alignItems: 'center' }} >
                             <Col
-                                data={this.state.students}
+                                data={this.getAllStudentNames()}
                                 style={styles.titleStyle}
                                 textStyle={[styles.textStyle, { color: 'white' }]}
-                                heightArr={this.state.headerHeightArr} />
+                                heightArr={this.props.headerHeightArr} />
                         </Table>
                         <View style={{ flex: 1 }}>
                             <ScrollView horizontal bounces={false} ref={(scroller) => { this.scroller = scroller; }} >
@@ -297,4 +289,16 @@ const styles = StyleSheet.create({
     }
 });
 
-export default AbsenceForm;
+const mapStateToProps = state => {
+    return {
+        currAbsenceList: state.home.currAbsenceList,
+        currAbsence: state.home.currAbsence,
+        headerHeightArr: [dataHeight, ...state.home.students.map(() => dataHeight)],
+        students: state.home.students
+    };
+};
+
+export default connect(mapStateToProps, {
+    retrieveAbsenceList,
+    updateAbsenceData
+})(AbsenceForm);
