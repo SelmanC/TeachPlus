@@ -49,7 +49,6 @@ class GroupModal extends Component {
     onSelectedBadgeChanged(selectedItem, members) {
         selectedItem.groupOwner = [];
         for (let i = 0; i < members.length; i++) {
-            delete members[i].groupMembers;
             selectedItem.groupOwner.push({
                 userMember: members[i]
             });

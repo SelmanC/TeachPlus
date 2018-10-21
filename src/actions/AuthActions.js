@@ -38,8 +38,14 @@ export const loginUser = (email, password, workspaceId, navigation) => {
                 'users/login',
                 'Login fehlgeschlagen',
                 user => {
-                    dispatch({ type: LOGIN_SUCCESS, payload: user });
-                    navigation.navigate('Main');
+                    getMethod(
+                        `groups/users/${user.id}`,
+                        'Fehler beim Abrufen der Gruppen',
+                        groups => {
+                            dispatch({ type: LOGIN_SUCCESS, payload: { user, groups } });
+                            navigation.navigate('Main');
+                        },
+                        error => dispatch({ type: LOGIN_FAIL, payload: error.message }));
                 },
                 error => dispatch({ type: LOGIN_FAIL, payload: error.message }),
                 { email, password, workspace: workspaceId });

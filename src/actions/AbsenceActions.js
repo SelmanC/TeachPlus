@@ -35,8 +35,6 @@ export const retrieveAllAbsenceLists = (userId) => {
 };
 
 export const addAbsenceList = (currUser, absenceList, absenceData) => {
-    delete absenceList['groupClass']['groupOwner'];
-
     return (dispatch) => {
         postMethod(
             'absences',
@@ -46,7 +44,10 @@ export const addAbsenceList = (currUser, absenceList, absenceData) => {
                     postMethod(
                         `absences/${data.id}/teacher/${currUser.id}`,
                         'Fehler beim Speichern des Vertreungsplans mit dem Lehrer',
-                        () => onAbsenceListSaved(absenceList, data, absenceData, dispatch),
+                        () => {
+                            data.teacher = [currUser];
+                            onAbsenceListSaved(absenceList, data, absenceData, dispatch);
+                        },
                         error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }));
                 } else {
                     onAbsenceListSaved(absenceList, data, absenceData, dispatch);
@@ -73,8 +74,6 @@ export const retrieveAbsenceList = (absenceList, selectedDate, daysInMonth, navi
 
 export const updateAbsenceData = (absenceList, absenceData, newAbsence, indexStudent, indexDay) => {
     newAbsence.absenceList = absenceList;
-    delete newAbsence.absenceList['groupClass']['groupOwner'];
-
     return (dispatch) => {
         postMethod(
             'absences/data',
@@ -114,7 +113,7 @@ function updateTableData(absenceList, tableData, selectedDate, daysInMonth, disp
                 'A' : '/';
             absence[i].push({ type });
         }
-        
+
         const studentData = tableData.filter(e => e.student.id === students[i].id);
         for (let y = 0; y < studentData.length; y++) {
             absence[i][studentData[y].day - 1] = studentData[y];

@@ -36,4 +36,11 @@ export const ALL_ABSENCES_RETRIEVED = 'retrieve_all_absencelist';
 export const NEW_ABSENCELIST = 'new_absencelist';
 export const NEW_ABSENCEDATA = 'new_absencedata';
 
+export const ALL_TIMESHEETS_RETRIEVED = 'retrieve_all_timesheets';
+export const NEW_TIMESHEET = 'new_timesheet';
+export const TIMESHEET_RETRIEVED = 'retrieve_timesheet';
+export const TIMESHEET_SELCTED = 'timesheet_selected';
+export const TIMESHEET_DATA_SAVED = 'timesheet_data_saved';
+
+
 export const ERROR_SHOWN = 'error_shown';

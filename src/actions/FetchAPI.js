@@ -5,6 +5,7 @@ const serverURL = 'http://localhost:8080/';
 export const getMethod = (url, errorMessage, successCallback, errorCallback, options) => {
     fetch(`${serverURL}${url}`, options)
         .then(resp => {
+            console.log(url, resp)
             if (!resp.ok) {
                 throw Error(errorMessage);
             } else {
@@ -39,6 +40,8 @@ export const postMethod = (url, errorMessage, successCallback, errorCallback, bo
         }
     })
         .then(resp => {
+            console.log(url, resp)
+
             if (!resp.ok) {
                 throw Error(errorMessage);
             } else if (resp.headers.map['content-type'].includes('application/json')) {

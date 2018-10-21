@@ -22,7 +22,8 @@ class DottedList extends Component {
                 key={key}
                 onPress={() => this.props.onListItemPressed(listIem)}>
                 <ListItem
-                    title={listIem.Name}
+                    title={listIem.name}
+                    subtitle={listIem.groupClass ? `Klasse: ${listIem.groupClass.name}` : ''}
                     rightIcon={
                         <TouchableOpacity
                             onPress={() => {

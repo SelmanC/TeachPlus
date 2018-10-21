@@ -1,52 +1,71 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
+import { connect } from 'react-redux';
+import { FormInput } from 'react-native-elements';
 import { Container, Content, Text, Fab, Icon, Form, Item, Input, Label } from 'native-base';
 import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
-import { DottedList } from './components';
-import { timeSheetsExpl } from './other';
+import { DottedList, ListModal } from './components';
+import { addTimeSheet, retrieveAllTimesheets, deleteStundenplan, selectTimeSheet, removeError } from './actions';
 
 const slideAnimation = new SlideAnimation({
     slideFrom: 'bottom',
 });
 
+const defaultSelectedItem = {
+    id: null,
+    name: '',
+    groupClass: {
+        id: null,
+        name: ''
+    },
+    timeColumns: []
+};
+
 class TimeSheetList extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            selectedItem: Object.assign({}, defaultSelectedItem),
             copyTimeSheetCell: null,
-            popupTextInputValue: '',
-            timeSheets: []
+            isClassChooserModalVisible: false
         };
     }
 
     componentDidMount() {
-        this.setState({ timeSheets: timeSheetsExpl });
+        const groupId = this.props.groups.map(e => e.id);
+        this.props.retrieveAllTimesheets(groupId);
     }
 
     createNewTimeSheet() {
-        const { copyTimeSheetCell, timeSheets, popupTextInputValue } = this.state;
+        const { copyTimeSheetCell, selectedItem } = this.state;
         let timeSheet = {};
+
         if (copyTimeSheetCell !== null) {
-            timeSheet = Object.assign([], timeSheets[copyTimeSheetCell]);
-            timeSheet.Name = popupTextInputValue;
-            timeSheet.id = null;
+            timeSheet = Object.assign([], this.props.timeSheetList[copyTimeSheetCell]);
+            timeSheet.name = selectedItem.name;
+            timeSheet.groupClass = selectedItem.groupClass;
         } else {
-            timeSheet = { Name: popupTextInputValue, id: null, timeSheet: { columns: [] } };
+            timeSheet = selectedItem;
         }
-        timeSheets.push(timeSheet);
-        this.setState({ copyTimeSheetCell: null, timeSheets, popupTextInputValue: '' });
+
+        this.props.addTimeSheet(timeSheet, this.props.timeSheetList);
+
+        this.setState({
+            copyTimeSheetCell: null,
+            selectedItem: Object.assign({}, defaultSelectedItem)
+        });
 
         this.popupDialog.dismiss();
-        this.props.navigation.navigate('TimeSheet', { timeSheet: Object.assign({}, timeSheet) });
     }
 
     renderTimeSheets() {
         return (
             <DottedList
-                listData={this.state.timeSheets}
-                onListItemPressed={(timeSheet) => this.props.navigation.navigate('TimeSheet', {
-                    timeSheet
-                })}
+                listData={this.props.timeSheetList}
+                onListItemPressed={(timeSheet) => {
+                    this.props.selectTimeSheet(timeSheet);
+                    this.props.navigation.navigate('TimeSheet');
+                }}
                 onCopyPressed={(cell) => {
                     this.setState({
                         copyTimeSheetCell: cell
@@ -54,16 +73,25 @@ class TimeSheetList extends Component {
                     this.popupDialog.show();
                 }}
                 onDeletePressed={(cell) => {
-                    this.state.timeSheets.splice(cell, 1);
-                    this.setState({
-                        timeSheets: this.state.timeSheets
-                    });
+                    this.props.deleteStundenplan(this.props.timeSheetList[cell], this.props.timeSheetList);
                 }}
             />
         );
     }
 
     render() {
+        if (this.props.error) {
+            Alert.alert(
+                'Error',
+                this.props.error,
+                [
+                    { text: 'OK', onPress: () => this.props.removeError() },
+                ],
+                { cancelable: false }
+            );
+        }
+
+
         return (
             <Container>
                 <Content bounces={false} >
@@ -75,9 +103,11 @@ class TimeSheetList extends Component {
                     <PopupDialog
                         ref={popupDialog => { this.popupDialog = popupDialog; }}
                         dialogAnimation={slideAnimation}
-                        height={0.3}
-                        onDismissed={() => this.setState({ popupTextInputValue: '', copyTimeSheetCell: null })}
-                    >
+                        height={0.4}
+                        onDismissed={() => this.setState({
+                            selectedItem: Object.assign({}, defaultSelectedItem),
+                            copyTimeSheetCell: null
+                        })} >
                         <View style={{ marginTop: 20, marginLeft: 20, flex: 1 }}>
 
                             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Neuer Stundenplan</Text>
@@ -86,9 +116,21 @@ class TimeSheetList extends Component {
                                 <Item floatingLabel>
                                     <Label>Name</Label>
                                     <Input
-                                        value={this.state.popupTextInputValue}
-                                        onChangeText={(value) => this.setState({ popupTextInputValue: value })} />
+                                        value={this.state.selectedItem.name}
+                                        onChangeText={(value) => this.setState({ selectedItem: { ...this.state.selectedItem, name: value } })} />
                                 </Item>
+
+                                <TouchableOpacity
+                                    onPress={() => this.setState({ isClassChooserModalVisible: true })} >
+                                    <FormInput
+                                        placeholder='Klasse'
+                                        value={this.state.selectedItem.groupClass.name}
+                                        containerStyle={styles.containerFormInputStyle}
+                                        editable={false}
+                                        pointerEvents="none"
+                                        placeholderTextColor='#828080'
+                                        inputStyle={styles.formInputFieldStyle} />
+                                </TouchableOpacity>
                             </Form>
 
                             <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20, marginRight: 20 }}>
@@ -112,6 +154,19 @@ class TimeSheetList extends Component {
                     </PopupDialog>
                 </Content>
 
+
+                <ListModal
+                    isVisible={this.state.isClassChooserModalVisible}
+                    renderedItems={this.props.groups}
+                    headerText='Klasse wählen'
+                    onCancel={() => this.setState({ isClassChooserModalVisible: false })}
+                    onSave={(classData) => this.setState({
+                        selectedItem: {
+                            ...this.state.selectedItem, groupClass: classData
+                        },
+                        isClassChooserModalVisible: false
+                    })} />
+
                 <Fab
                     active
                     direction="up"
@@ -128,4 +183,31 @@ class TimeSheetList extends Component {
     }
 }
 
-export default TimeSheetList;
+const styles = StyleSheet.create({
+    containerFormInputStyle: {
+        width: 285,
+        marginTop: 20,
+        alignSelf: 'center',
+        marginLeft: 38
+    },
+    formInputFieldStyle: {
+        fontSize: 18,
+        color: 'black'
+    },
+});
+
+const mapStateToProps = state => {
+    return {
+        groups: state.auth.groups,
+        timeSheetList: state.home.timeSheetList,
+        error: state.home.error
+    };
+};
+
+export default connect(mapStateToProps, {
+    retrieveAllTimesheets,
+    addTimeSheet,
+    deleteStundenplan,
+    selectTimeSheet,
+    removeError
+})(TimeSheetList);

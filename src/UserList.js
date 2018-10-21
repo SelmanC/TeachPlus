@@ -56,11 +56,10 @@ class UserList extends Component {
                 <UserSearchList
                     personList={this.props.userData}
                     searchGroup={false}
-                    onUserClicked={(item) =>
-                        this.setState({
-                            selectedItem: Object.assign({}, item),
-                            modalVisible: true
-                        })} />
+                    onUserClicked={(item) => this.setState({
+                        selectedItem: Object.assign({}, item),
+                        modalVisible: true
+                    })} />
 
                 <UserModal
                     modalVisible={this.state.modalVisible}
@@ -70,7 +69,7 @@ class UserList extends Component {
                     })}
                     onDelete={() => { this.onDelete(); }}
                     onSave={(selectedItem) => { this.onSave(selectedItem); }}
-                    selectedItem={this.state.selectedItem} 
+                    selectedItem={this.state.selectedItem}
                     childrenData={this.props.userData.filter(e => e.role === 'student')} />
 
                 <Fab

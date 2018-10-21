@@ -166,7 +166,7 @@ class VertretungsList extends Component {
 }
 
 const mapStateToProps = state => {
-    const groups = state.auth.user.groupMembers ? state.auth.user.groupMembers.map(e => e.groupOwner.id) : null;
+    const groups = state.auth.groups.map(e => e.id);
     return {
         groups,
         showSpinner: state.home.showSpinner,

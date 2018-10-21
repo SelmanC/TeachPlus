@@ -7,7 +7,8 @@ const INITIAL_STATE = {
         id: null
     },
     error: '',
-    user: {}
+    user: {},
+    groups: []
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -23,7 +24,7 @@ export default (state = INITIAL_STATE, action) => {
         case LOGIN:
             return { ...state, showSpinner: true, error: '' };
         case LOGIN_SUCCESS:
-            return { ...state, showSpinner: false, user: action.payload };
+            return { ...state, showSpinner: false, ...action.payload };
         case LOGIN_FAIL:
             return { ...state, showSpinner: false, error: action.payload };
         default:

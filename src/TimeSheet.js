@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { connect } from 'react-redux';
 import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { SubjectPopup } from './components';
 import { LocaleConfigDE, createTimeString, createBeginTimeString, createEndTimeString } from './other';
+import { addTimeSheetTimeDataColumn, addTimeSheetTimeDataRow, retriveTeacher, deleteStundenplanData } from './actions';
 
 const minColumns = 9;
 const dataWidth = 90;
@@ -11,15 +13,26 @@ const dataHeight = 60;
 const defaultLengthPerSubject = 45;
 
 const defaultValueCelectedCourse = {
-    selected: false,
-    selectedColumn: null,
-    selectedRow: null,
-    selectedIndex: null,
+    id: null,
     subject: '',
-    teacher: '',
-    location: '',
+    teacher: {
+        id: null,
+        name: ''
+    },
+    room: '',
+    color: 'white'
+};
+
+const defaultSelectedColumn = {
+    id: null,
+    timesheetColumn: null,
     startTime: '',
     endTime: ''
+};
+
+const defaultSelectedRow = {
+    id: null,
+    timesheetRow: null
 };
 
 class TimeSheet extends Component {
@@ -27,75 +40,46 @@ class TimeSheet extends Component {
         super(props);
         const days = [' ', ...LocaleConfigDE.dayNamesShort];
         const headWidthArr = [];
-        const timesheetData = this.props.navigation.getParam('timeSheet');
-
         days.forEach(() => headWidthArr.push(dataWidth));
 
         this.state = {
-            selectedCourse: { ...defaultValueCelectedCourse },
+            selectedColumn: Object.assign({}, defaultSelectedColumn),
+            selectedRow: Object.assign({}, defaultSelectedRow),
+            selectedCourse: Object.assign({}, defaultValueCelectedCourse),
             days,
             headWidthArr,
-            timesheetData,
             isDateTimePickerVisible: false,
             isDateTimePickerForBegin: true,
-            dataTimePickerColumn: null,
         };
     }
 
+    componentDidMount() {
+        this.props.retriveTeacher();
+    }
+
     onColumnTimeChanged(date) {
-        const { isDateTimePickerForBegin, dataTimePickerColumn } = this.state;
-        const data = this.state.timesheetData;
+        const { isDateTimePickerForBegin, selectedColumn } = this.state;
         const timeString = createTimeString(date.getHours(), date.getMinutes());
-        const columnIndex = data.timeSheet.columns.findIndex(e => e.column === dataTimePickerColumn);
-        if (columnIndex < 0) {
-            const newColumn = {
-                column: dataTimePickerColumn,
-                startTime: isDateTimePickerForBegin ? timeString : createBeginTimeString(date, defaultLengthPerSubject),
-                endTime: isDateTimePickerForBegin ? createEndTimeString(date, defaultLengthPerSubject) : timeString,
-                rows: []
-            };
-            data.timeSheet.columns.push(newColumn);
+        let startTime = '';
+        let endTime = '';
+
+        if (isDateTimePickerForBegin) {
+            startTime = timeString;
+            endTime = selectedColumn.endTime ? selectedColumn.endTime : createEndTimeString(date, defaultLengthPerSubject);
         } else {
-            data.timeSheet.columns[columnIndex][isDateTimePickerForBegin ? 'startTime' : 'endTime'] = timeString;
+            endTime = timeString;
+            startTime = selectedColumn.startTime ? selectedColumn.startTime : createBeginTimeString(date, defaultLengthPerSubject);
         }
+        selectedColumn.startTime = startTime;
+        selectedColumn.endTime = endTime;
+
+        this.props.addTimeSheetTimeDataColumn(this.props.currTimeSheet, this.props.timeSheetList, selectedColumn);
 
         this.setState({
             isDateTimePickerForBegin: true,
             isDateTimePickerVisible: false,
-            dataTimePickerColumn: null,
-            timesheetData: data,
+            selectedColumn: Object.assign({}, defaultSelectedColumn)
         });
-    }
-
-    getSelectedCourseObject(subjectData, startTime, endTime, column, row, index) {
-        if (subjectData.pause) {
-            return {
-                ...defaultValueCelectedCourse,
-                selected: true,
-                pause: true,
-                selectedColumn: column,
-                selectedRow: row,
-                selectedIndex: index,
-                subject: subjectData.subject,
-                color: subjectData.color ? subjectData.color : 'white',
-                startTime,
-                endTime
-            };
-        }
-        return {
-            ...defaultValueCelectedCourse,
-            selected: true,
-            pause: false,
-            selectedColumn: column,
-            selectedRow: row,
-            selectedIndex: index,
-            subject: subjectData.subject,
-            teacher: subjectData.teacher,
-            location: subjectData.room,
-            color: subjectData.color ? subjectData.color : 'white',
-            startTime,
-            endTime
-        };
     }
 
     getFirstRowName(subjectData) {
@@ -103,81 +87,48 @@ class TimeSheet extends Component {
             return `${subjectData.startTime}\n - \n${subjectData.endTime}`;
         }
 
-        return `${subjectData.column + 1}`;
+        return `${subjectData.timesheetColumn + 1}`;
     }
 
     getTimePickerDateValue() {
-        const { dataTimePickerColumn } = this.state;
-        const data = this.state.timesheetData;
+        const { selectedColumn, isDateTimePickerForBegin } = this.state;
         let returnDate = new Date();
 
-        if (dataTimePickerColumn !== null) {
-            const column = data.timeSheet.columns.find(e => e.column === dataTimePickerColumn);
-            if (column) {
-                const currDate = new Date();
-                const time = this.state.isDateTimePickerForBegin ? column.startTime : column.endTime;
-                if (time) {
-                    const splitTime = time.split(':');
+        if (selectedColumn) {
+            const currDate = new Date();
+            const time = isDateTimePickerForBegin ? selectedColumn.startTime : selectedColumn.endTime;
+            if (time) {
+                const splitTime = time.split(':');
 
-                    returnDate = new Date(
-                        currDate.getFullYear(),
-                        currDate.getMonth(),
-                        currDate.getDate(),
-                        splitTime[0],
-                        splitTime[1]
-                    );
-                }
+                returnDate = new Date(
+                    currDate.getFullYear(),
+                    currDate.getMonth(),
+                    currDate.getDate(),
+                    splitTime[0],
+                    splitTime[1]
+                );
             }
         }
         return returnDate;
     }
 
     saveSubject(subjectData) {
-        const { selectedColumn, selectedRow, selectedIndex } = this.state.selectedCourse;
-        const data = this.state.timesheetData;
-        const columnIndex = data.timeSheet.columns.findIndex(e => e.column === selectedColumn);
+        const { selectedColumn, selectedRow } = this.state;
 
-        if (columnIndex < 0) {
-            const newColumn = {
-                column: selectedColumn,
-                startTime: '',
-                endTime: '',
-                rows: [{
-                    row: selectedRow,
-                    subjects: [subjectData]
-                }]
-            };
-            data.timeSheet.columns.push(newColumn);
-        } else if (selectedIndex !== null) {
-            const rowIndex = data.timeSheet.columns[columnIndex].rows.findIndex(e => e.row === selectedRow);
+        selectedRow.subjectData = [subjectData];
+        this.props.addTimeSheetTimeDataRow(this.props.currTimeSheet, this.props.timeSheetList, selectedColumn, selectedRow);
+        this.setState({
+            selectedCourse: Object.assign({}, defaultValueCelectedCourse),
+            selectedColumn: Object.assign({}, defaultSelectedColumn),
+            selectedRow: Object.assign({}, defaultSelectedRow)
+        });
 
-            if (rowIndex < 0) {
-                data.timeSheet.columns[columnIndex].rows.push({ row: selectedRow, subjects: [subjectData] });
-            } else if (subjectData.addSubjectToArray) {
-                data.timeSheet.columns[columnIndex].rows[rowIndex].subjects.push(subjectData);
-            } else {
-                data.timeSheet.columns[columnIndex].rows[rowIndex].subjects[selectedIndex] = subjectData;
-            }
-        } else {
-            const rowIndex = data.timeSheet.columns[columnIndex].rows.findIndex(e => e.row === selectedRow);
-            if (rowIndex < 0) {
-                data.timeSheet.columns[columnIndex].rows.push({ row: selectedRow, subjects: [subjectData] });
-            } else {
-                data.timeSheet.columns[columnIndex].rows[rowIndex].subjects.push(subjectData);
-            }
-        }
-        this.setState({ timesheetData: data });
         this.popupDialog.dismiss();
     }
 
     deleteSubject() {
-        const { selectedColumn, selectedRow, selectedIndex } = this.state.selectedCourse;
-        const data = this.state.timesheetData;
-
-        const columnIndex = data.timeSheet.columns.findIndex(e => e.column === selectedColumn);
-        const rowIndex = data.timeSheet.columns[columnIndex].rows.findIndex(e => e.row === selectedRow);
-        data.timeSheet.columns[columnIndex].rows[rowIndex].subjects.splice(selectedIndex, 1);
-        this.setState({ timesheetData: data });
+        const { selectedColumn, selectedRow, selectedCourse } = this.state;
+        this.props.deleteStundenplanData(this.props.currTimeSheet, this.props.timeSheetList, selectedColumn, selectedRow, selectedCourse);
         this.popupDialog.dismiss();
     }
 
@@ -188,30 +139,30 @@ class TimeSheet extends Component {
             [
                 {
                     text: 'Beginn',
-                    onPress: () =>
+                    onPress: () => {
+                        const selCol = this.props.currTimeSheet.timeColumns.find(e => e.timesheetColumn === column);
+
                         this.setState({
                             isDateTimePickerVisible: true,
                             isDateTimePickerForBegin: true,
-                            dataTimePickerColumn: column
-                        })
+                            selectedColumn: !selCol ? { ...defaultSelectedColumn, timesheetColumn: column } : selCol
+                        });
+                    }
                 },
                 {
                     text: 'Ende',
-                    onPress: () =>
+                    onPress: () => {
+                        const selCol = this.props.currTimeSheet.timeColumns.find(e => e.timesheetColumn === column);
                         this.setState({
                             isDateTimePickerVisible: true,
                             isDateTimePickerForBegin: false,
-                            dataTimePickerColumn: column
-                        })
+                            selectedColumn: !selCol ? { ...defaultSelectedColumn, timesheetColumn: column } : selCol
+                        });
+                    }
                 },
                 {
                     text: 'Abrechen',
-                    onPress: () =>
-                        this.setState({
-                            isDateTimePickerVisible: true,
-                            isDateTimePickerForBegin: false,
-                            dataTimePickerColumn: column
-                        }),
+                    onPress: () => { },
                     style: 'cancel'
                 },
             ],
@@ -219,12 +170,16 @@ class TimeSheet extends Component {
         );
     }
 
-    renderSubjectsAtSameTime(selectedCourse, subjectLengthAtSameTime, key) {
+    renderSubjectsAtSameTime(selectedColumn, selectedRow, selectedCourse, subjectLengthAtSameTime, key) {
         return (
             <TouchableOpacity
                 key={key}
                 onPress={() => {
-                    this.setState({ selectedCourse });
+                    this.setState({
+                        selectedCourse,
+                        selectedColumn,
+                        selectedRow
+                    });
                     this.popupDialog.show();
                 }}>
                 <Cell
@@ -248,40 +203,41 @@ class TimeSheet extends Component {
         );
     }
 
-    renderSubjectCells(subjectData) {
+    renderSubjectCells(column) {
         const renderedData = [];
         let key = 1;
         for (let i = 0; i < this.state.days.length - 1; i++) {
-            const row = subjectData.rows.find(r => r.row === i);
-            if (row && row.subjects.length > 0) {
-                for (let y = 0; y < row.subjects.length; y++) {
-                    const selectedCourse = this.getSelectedCourseObject(row.subjects[y], subjectData.startTime, subjectData.endTime, subjectData.column, row.row, y);
-                    renderedData.push(this.renderSubjectsAtSameTime(selectedCourse, row.subjects.length, key++));
+            const row = column.rows.find(r => r.timesheetRow === i);
+            if (row && row.subjectData.length > 0) {
+                for (let y = 0; y < row.subjectData.length; y++) {
+                    renderedData.push(this.renderSubjectsAtSameTime(column, row, row.subjectData[y], row.subjectData.length, key++));
                 }
+            } else if (row) {
+                renderedData.push(this.renderSubjectsAtSameTime(column, row, Object.assign({}, defaultValueCelectedCourse), 1, key++));
             } else {
-                renderedData.push(this.renderRowWithNoValueForOneDay(subjectData.column, i, key++));
+                renderedData.push(this.renderSubjectsAtSameTime(column, { ...defaultSelectedRow, timesheetRow: i }, Object.assign({}, defaultValueCelectedCourse), 1, key++));
             }
         }
         return renderedData;
     }
 
-    renderSubjectAndTimeRow(subjectData) {
+    renderSubjectAndTimeRow(column) {
         return (
             <TableWrapper
-                key={subjectData.column}
+                key={column.timesheetColumn}
                 style={{ flexDirection: 'row' }}
             >
                 <TouchableOpacity
-                    key={subjectData.column}
-                    onPress={() => { this.renderAlertMessageForTime(subjectData.column); }}>
+                    key={column.timesheetColumn}
+                    onPress={() => this.renderAlertMessageForTime(column.timesheetColumn)}>
                     <Cell
                         key={0}
-                        data={this.getFirstRowName(subjectData)}
+                        data={this.getFirstRowName(column)}
                         textStyle={[styles.textStyle]}
                         style={[styles.cellStyle]} />
                 </TouchableOpacity>
                 {
-                    this.renderSubjectCells(subjectData)
+                    this.renderSubjectCells(column)
                 }
             </TableWrapper>
         );
@@ -292,12 +248,11 @@ class TimeSheet extends Component {
             <TouchableOpacity
                 key={key}
                 onPress={() => {
-                    const selectedCourse = {
-                        ...defaultValueCelectedCourse,
-                        selectedColumn: column,
-                        selectedRow: row
-                    };
-                    this.setState({ selectedCourse });
+                    this.setState({
+                        selectedCourse: Object.assign({}, defaultValueCelectedCourse),
+                        selectedColumn: { ...this.state.selectedColumn, timesheetColumn: column },
+                        selectedRow: { ...this.state.selectedRow, timesheetRow: row }
+                    });
                     this.popupDialog.show();
                 }}>
                 <Cell
@@ -340,14 +295,10 @@ class TimeSheet extends Component {
     }
 
     renderRows() {
-        const { columns } = this.state.timesheetData.timeSheet;
+        const { timeColumns } = this.props.currTimeSheet;
         const rowData = [];
         for (let i = minColumns - 1; i >= 0; i--) {
-            if (!columns) {
-                rowData.push(this.renderRowWithNoValue(i));
-                continue;
-            }
-            const column = columns.find(col => col.column === i);
+            const column = timeColumns.find(col => col.timesheetColumn === i);
             if (column) {
                 rowData.push(this.renderSubjectAndTimeRow(column));
             } else {
@@ -369,13 +320,16 @@ class TimeSheet extends Component {
                     }}>
 
                     <SubjectPopup
-                        selectedCourse={this.state.selectedCourse}
+                        selectedItem={this.state.selectedCourse}
                         onRef={(popupDialog) => { this.popupDialog = popupDialog; }}
                         onSavePressed={(data) => { this.saveSubject(data); }}
                         onDelteSubject={() => { this.deleteSubject(); }}
+                        teachers={this.props.teachers}
                         onCancelPressed={() => {
                             this.setState({
-                                selectedCourse: { ...defaultValueCelectedCourse }
+                                selectedCourse: Object.assign({}, defaultValueCelectedCourse),
+                                selectedColumn: Object.assign({}, defaultSelectedColumn),
+                                selectedRow: Object.assign({}, defaultSelectedRow)
                             });
                             this.popupDialog.dismiss();
                         }} />
@@ -394,7 +348,7 @@ class TimeSheet extends Component {
                             onCancel={() => this.setState({
                                 isDateTimePickerForBegin: true,
                                 isDateTimePickerVisible: false,
-                                dataTimePickerColumn: null
+                                selectedColumn: Object.assign({}, defaultSelectedColumn)
                             })}
                         />}
 
@@ -456,5 +410,19 @@ const styles = StyleSheet.create({
     }
 });
 
+const mapStateToProps = state => {
+    return {
+        currTimeSheet: state.home.currTimeSheet,
+        timeSheetList: state.home.timeSheetList,
+        error: state.home.error,
+        teachers: state.home.teachers,
+    };
+};
 
-export default TimeSheet;
+export default connect(mapStateToProps, {
+    addTimeSheetTimeDataColumn,
+    addTimeSheetTimeDataRow,
+    retriveTeacher,
+    deleteStundenplanData
+})(TimeSheet);
+

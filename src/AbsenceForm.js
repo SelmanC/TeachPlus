@@ -48,7 +48,6 @@ class AbsenceForm extends Component {
         newData.month = currMonthVal;
         newData.day = selectedCell.day + 1;
         delete newData.selectedOption;
-        delete newData.student['groupMembers'];
 
         this.props.updateAbsenceData(this.props.currAbsenceList, this.props.currAbsence, newData, selectedCell.studentIndex, selectedCell.day);
         this.popupDialog.dismiss();

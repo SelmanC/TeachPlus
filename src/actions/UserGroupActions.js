@@ -75,6 +75,8 @@ export const addUser = (user, userData) => {
                         () => onUserSave(user, data, userData, dispatch),
                         error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
                         user.children);
+                } else {
+                    onUserSave(user, data, userData, dispatch);
                 }
             },
             error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),

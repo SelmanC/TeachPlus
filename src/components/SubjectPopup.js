@@ -1,18 +1,22 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { Picker, Item, Icon, Form, Label, Fab, Input, Button } from 'native-base';
+import { Item, Icon, Form, Label, Fab, Button } from 'native-base';
+import { FormInput } from 'react-native-elements';
 import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
 import { ColorPicker } from 'react-native-color-picker';
-import { courses, Teachers, colors } from '../other';
+import { ListModal } from './ListModal';
+import { colors } from '../other';
 
 
 const defaultValue = {
+    id: null,
     subject: '',
-    teacher: '',
-    location: '',
-    color: 'white',
-    modalVisible: false,
-    active: false
+    teacher: {
+        id: null,
+        name: ''
+    },
+    room: '',
+    color: 'white'
 };
 
 const slideAnimation = new SlideAnimation({
@@ -22,38 +26,49 @@ const slideAnimation = new SlideAnimation({
 class SubjectPopup extends Component {
     constructor(props) {
         super(props);
-        this.state = { ...defaultValue };
+        this.state = {
+            selectedItem: Object.assign({}, defaultValue),
+            modalShown: false,
+            modalVisible: false,
+            active: false,
+            isTeacherChooserModalVisible: false
+        };
     }
 
     setNewAbsenceValue(addSubjectToArray) {
-        const { location, teacher, subject, color } = this.state;
-
-        if (this.didValueChange(location, teacher, subject, color)) {
-            this.props.onSavePressed({ location, teacher, subject, color, addSubjectToArray });
-        } else {
-            this.props.onCancelPressed();
-        }
-    }
-
-    didValueChange(location, teacher, subject, color) {
-        return (
-            (subject && !this.props.selectedCourse.subject) ||
-            location !== this.props.selectedCourse.location ||
-            teacher !== this.props.selectedCourse.teacher ||
-            subject !== this.props.selectedCourse.subject ||
-            color !== this.props.selectedCourse.color);
+        this.props.onSavePressed(this.state.selectedItem, addSubjectToArray);
+        this.setState({
+            selectedItem: Object.assign({}, defaultValue),
+            modalShown: false,
+            modalVisible: false
+        });
     }
 
     subjectChange(subject) {
-        this.setState({ subject });
+        this.setState({
+            selectedItem: {
+                ...this.state.selectedItem,
+                subject
+            }
+        });
     }
 
     teacherChange(teacher) {
-        this.setState({ teacher });
+        this.setState({
+            selectedItem: {
+                ...this.state.selectedItem,
+                teacher
+            }
+        });
     }
 
-    locationChange(location) {
-        this.setState({ location });
+    locationChange(room) {
+        this.setState({
+            selectedItem: {
+                ...this.state.selectedItem,
+                room
+            }
+        });
     }
 
     renderSaveFabItem() {
@@ -62,26 +77,26 @@ class SubjectPopup extends Component {
         return (
             <Button
                 style={{ backgroundColor: '#34A34F' }}
-                onPress={() => { this.setNewAbsenceValue(false); }}>
+                onPress={() => { this.setNewAbsenceValue(); }}>
                 <Icon name="save" type='MaterialIcons' style={{ color: 'white' }} />
             </Button>
         );
     }
 
-    renderAddNewFabItem() {
-        if (!this.state.active) return;
+    renderAddNewFabItem(selectedItem) {
+        if (!this.state.active || !selectedItem.id || false) return;
 
         return (
             <Button
                 style={{ backgroundColor: '#009688' }}
-                onPress={() => { this.setNewAbsenceValue(true); }}>
+                onPress={() => { this.setNewAbsenceValue(); }}>
                 <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
             </Button>
         );
     }
 
-    renderFabs() {
-        if (this.props.selectedCourse.subject === '') {
+    renderFabs(selectedItem) {
+        if (selectedItem.subject === '') {
             return (
                 <Fab
                     active
@@ -89,7 +104,7 @@ class SubjectPopup extends Component {
                     style={{ backgroundColor: '#ff8935', marginBottom: 10 }}
                     position="bottomRight">
                     <TouchableOpacity
-                        onPress={() => { this.setNewAbsenceValue(false); }}>
+                        onPress={() => { this.setNewAbsenceValue(); }}>
                         <Icon name="save" type='MaterialIcons' style={{ color: 'white' }} />
                     </TouchableOpacity>
                 </Fab>
@@ -111,7 +126,7 @@ class SubjectPopup extends Component {
                         this.renderSaveFabItem()
                     }
                     {
-                        this.renderAddNewFabItem()
+                        this.renderAddNewFabItem(selectedItem)
                     }
                 </Fab>
 
@@ -123,7 +138,14 @@ class SubjectPopup extends Component {
                     style={{ backgroundColor: '#E91E63', marginBottom: 10 }}
                     position="bottomRight">
                     <TouchableOpacity
-                        onPress={() => { this.setState(defaultValue); this.props.onDelteSubject(); }}>
+                        onPress={() => {
+                            this.setState({
+                                selectedItem: Object.assign({}, defaultValue),
+                                modalVisible: false,
+                                active: false
+                            });
+                            this.props.onDelteSubject();
+                        }}>
                         <Icon name="delete" type='MaterialIcons' style={{ color: 'white' }} />
                     </TouchableOpacity>
                 </Fab>
@@ -134,43 +156,44 @@ class SubjectPopup extends Component {
     renderColors() {
         return colors.map((color, key) => (
             <TouchableOpacity
-                onPress={() => this.setState({ modalVisible: false, color })}
+                onPress={() => this.setState({ modalVisible: false, selectedItem: { ...this.state.selectedItem, color } })}
                 key={key}>
                 <View key={key} style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: color, marginRight: 5 }} />
             </TouchableOpacity>
         ));
     }
 
-    renderForm() {
-        if (this.state.subject !== 'Pause') {
+    renderForm(selectedItem) {
+        if (selectedItem.subject !== 'Pause') {
             return (
                 <View style={{ margin: 10, flexDirection: 'row' }} >
                     <View style={{ flexDirection: 'column' }} >
                         <View style={[styles.fieldContainerStyle]} >
                             <Icon name="md-person" />
-                            <Picker
-                                mode="dropdown"
-                                iosIcon={<Icon name="ios-arrow-down-outline" />}
-                                iosHeader="Lehrer"
-                                mode="dropdown"
-                                style={styles.subjectPickerStyle}
-                                selectedValue={this.state.teacher}
-                                onValueChange={this.teacherChange.bind(this)}
-                                placeholder='Lehrer'>
-                                {
-                                    Teachers.map((teacher, key) => (
-                                        <Item label={teacher} value={teacher} key={key} />
-                                    ))
-                                }
-                            </Picker>
-                        </View>
 
+                            <TouchableOpacity
+                                onPress={() => this.setState({ isTeacherChooserModalVisible: true })}
+                                style={{ flex: 1 }}>
+                                <FormInput
+                                    placeholder='Lehrer'
+                                    value={this.state.selectedItem.teacher.name}
+                                    editable={false}
+                                    pointerEvents="none"
+                                    placeholderTextColor='#333333'
+                                    containerStyle={{ width: 200 }}
+                                    inputStyle={styles.formInputFieldStyle} />
+                            </TouchableOpacity>
+                        </View>
 
                         <View style={styles.fieldContainerStyle} >
                             <Icon name="location-pin" type='Entypo' />
-                            <Item style={{ width: 200 }}>
-                                <Input placeholder='Raum' style={{ width: 200 }} />
-                            </Item>
+                            <FormInput
+                                placeholder='Raum'
+                                onChangeText={this.locationChange.bind(this)}
+                                value={this.state.selectedItem.room}
+                                placeholderTextColor='#333333'
+                                containerStyle={{ width: 200 }}
+                                inputStyle={styles.formInputFieldStyle} />
                         </View>
                     </View>
 
@@ -178,10 +201,10 @@ class SubjectPopup extends Component {
 
                         <TouchableOpacity
                             onPress={() => { this.setState({ modalVisible: true }); }}>
-                            <View style={[styles.roundIconContainerStyle, { backgroundColor: this.state.color !== 'white' ? this.state.color : '#efefef' }]}>
+                            <View style={[styles.roundIconContainerStyle, { backgroundColor: selectedItem.color !== 'white' ? selectedItem.color : '#efefef' }]}>
                                 <Icon
                                     name="md-color-filter"
-                                    style={{ color: this.state.color !== 'white' ? 'white' : 'black' }} />
+                                    style={{ color: selectedItem.color !== 'white' ? 'white' : 'black' }} />
                             </View>
                         </TouchableOpacity>
 
@@ -192,7 +215,15 @@ class SubjectPopup extends Component {
                             <View style={{ flex: 1 }}>
 
                                 <ColorPicker
-                                    onColorSelected={color => { this.setState({ modalVisible: false, color }); }}
+                                    onColorSelected={color => {
+                                        this.setState({
+                                            selectedItem: {
+                                                ...this.state.selectedItem,
+                                                color
+                                            },
+                                            modalVisible: false
+                                        });
+                                    }}
                                     style={{ flex: 3, marginBottom: 10 }}
                                 />
 
@@ -218,51 +249,66 @@ class SubjectPopup extends Component {
     }
 
     render() {
+        const selectedItem = this.state.modalShown ? this.state.selectedItem : this.props.selectedItem;
         return (
             <PopupDialog
                 ref={(popupDialog) => this.props.onRef(popupDialog)}
                 dialogAnimation={slideAnimation}
                 height={0.5}
                 containerStyle={{ justifyContent: 'flex-end' }}
-                onDismissed={() => this.setState(defaultValue)}
+                onDismissed={() =>
+                    this.setState({
+                        selectedItem: Object.assign({}, defaultValue),
+                        modalShown: false,
+                        modalVisible: false,
+                        active: false
+                    })
+                }
                 onShown={() => this.setState({
-                    teacher: this.props.selectedCourse.teacher,
-                    location: this.props.selectedCourse.location,
-                    color: this.props.selectedCourse.color ? this.props.selectedCourse.color : 'white',
-                    subject: this.props.selectedCourse.subject,
+                    selectedItem: Object.assign({}, this.props.selectedItem),
+                    modalShown: true
                 })}
             >
                 <View style={{ flex: 1 }}>
                     <View style={{ height: 75, backgroundColor: '#4C3E54', flexDirection: 'row' }}>
                         <Item stackedLabel style={{ width: 200, marginLeft: 10 }}>
                             <Label style={{ color: 'white' }}>Fach</Label>
-                            <Picker
-                                mode="dropdown"
-                                iosIcon={<Icon name="ios-arrow-down-outline" />}
-                                iosHeader="Fächer"
-                                mode="dropdown"
-                                style={styles.subjectPickerStyle}
-                                selectedValue={this.state.subject}
-                                onValueChange={this.subjectChange.bind(this)}>
-                                {
-                                    courses.map((course, key) => (
-                                        <Item label={course} value={course} key={key} />
-                                    ))
-                                }
-                            </Picker>
+                            <FormInput
+                                onChangeText={(subject) => this.setState({
+                                    selectedItem: {
+                                        ...this.state.selectedItem,
+                                        subject
+                                    }
+                                })}
+                                value={selectedItem.subject}
+                                containerStyle={styles.subjectPickerStyle}
+                                inputStyle={styles.formInputFieldStyle} />
                         </Item>
 
                         {
-                            this.renderFabs()
+                            this.renderFabs(selectedItem)
                         }
 
                     </View>
                     <Form>
                         {
-                            this.renderForm()
+                            this.renderForm(selectedItem)
                         }
                     </Form>
                 </View>
+
+                <ListModal
+                    isVisible={this.state.isTeacherChooserModalVisible}
+                    renderedItems={this.props.teachers}
+                    headerText='Lehrer wählen'
+                    onCancel={() => this.setState({ isTeacherChooserModalVisible: false })}
+                    onSave={(teacherData) => this.setState({
+                        selectedItem: {
+                            ...this.state.selectedItem,
+                            teacher: teacherData
+                        },
+                        isTeacherChooserModalVisible: false
+                    })} />
 
             </PopupDialog>
         );
@@ -304,6 +350,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    formInputFieldStyle: {
+        color: 'black'
     }
 });
 

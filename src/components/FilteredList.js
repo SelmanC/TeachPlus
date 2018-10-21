@@ -11,13 +11,18 @@ class FilteredList extends Component {
     }
 
     renderListItem(item) {
-        if (this.props.showSubtitle !== false && item.email) {
+        if (this.props.showSubtitle !== false && (item.email || item.subject)) {
+            
+            let subtitle = '';
+            if (item.email) subtitle = item.email;
+            else if (item.subject) subtitle = item.subject;
+
             return (
                 <ListItem
                     roundAvatar
                     avatar={require('../../assets/images/TeachPlus_Logo.png')}
                     title={item.name}
-                    subtitle={this.props.showSubtitle !== false && item.email ? item.email : ''}
+                    subtitle={subtitle}
                 />
             );
         }

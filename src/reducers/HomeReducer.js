@@ -19,7 +19,11 @@ import {
     ABSENCELIST_RETRIEVED,
     ALL_ABSENCES_RETRIEVED,
     NEW_ABSENCELIST,
-    NEW_ABSENCEDATA
+    NEW_ABSENCEDATA,
+    ALL_TIMESHEETS_RETRIEVED,
+    NEW_TIMESHEET,
+    TIMESHEET_SELCTED,
+    TIMESHEET_DATA_SAVED
 } from '../actions/types';
 
 const defaultUser = {
@@ -46,6 +50,23 @@ const defaultAbsenceList = {
     id: null
 };
 
+const defaultSelectedGroup = {
+    id: null,
+    name: '',
+    groupOwner: [],
+    role: 'group'
+};
+
+const defaultSelectedTimeSheet = {
+    id: null,
+    name: '',
+    groupClass: {
+        id: null,
+        name: ''
+    },
+    timeColumns: []
+};
+
 const INITIAL_STATE = {
     showSpinner: false,
     vertretungsplanList: {},
@@ -53,7 +74,7 @@ const INITIAL_STATE = {
     notesData: [],
     userData: [],
     groupData: [],
-    selectedItem: {},
+    selectedItem: Object.assign({}, defaultSelectedGroup),
     showModal: false,
     currChildren: [],
     currUser: Object.assign({}, defaultUser),
@@ -61,7 +82,9 @@ const INITIAL_STATE = {
     absenceData: [],
     currAbsenceList: Object.assign({}, defaultAbsenceList),
     currAbsence: [],
-    students: []
+    students: [],
+    timeSheetList: [],
+    currTimeSheet: Object.assign({}, defaultSelectedTimeSheet)
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -93,7 +116,7 @@ export default (state = INITIAL_STATE, action) => {
         case GROUPS_RETRIEVED:
             return { ...state, groupData: [...action.payload], showSpinner: false };
         case CLOSE_MODAL:
-            return { ...state, showModal: false };
+            return { ...state, showModal: false, selectedItem: Object.assign({}, defaultSelectedGroup) };
         case SINGLE_GROUP_RETRIEVED:
             return { ...state, selectedItem: { ...action.payload }, showModal: true, showSpinner: false };
         case NEW_GROUPDATA:
@@ -108,6 +131,14 @@ export default (state = INITIAL_STATE, action) => {
             return { ...state, absenceData: [...action.payload], showSpinner: false };
         case NEW_ABSENCELIST:
             return { ...state, absenceData: [...action.payload] };
+        case ALL_TIMESHEETS_RETRIEVED:
+            return { ...state, timeSheetList: [...action.payload], showSpinner: false };
+        case NEW_TIMESHEET:
+            return { ...state, timeSheetList: [...action.payload] };
+        case TIMESHEET_SELCTED:
+            return { ...state, currTimeSheet: { ...action.payload } };
+        case TIMESHEET_DATA_SAVED:
+            return { ...state, currTimeSheet: { ...action.payload.timeSheet }, timeSheetList: [...action.payload.timeSheetList] };
         default:
             return state;
     }

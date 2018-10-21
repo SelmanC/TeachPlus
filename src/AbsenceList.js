@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => {
     return {
         absenceData: state.home.absenceData,
-        groups: state.auth.user.groupMembers.map(e => e.groupOwner),
+        groups: state.auth.groups,
         teachers: state.home.teachers,
         user: state.auth.user,
         error: state.home.error
