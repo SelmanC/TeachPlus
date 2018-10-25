@@ -44,7 +44,7 @@ class AbsenceForm extends Component {
     setNewTypeValue(newData) {
         const { selectedCell, currMonthVal } = this.state;
         newData.student = this.props.students[selectedCell.studentIndex];
-        
+
         newData.month = currMonthVal;
         newData.day = selectedCell.day + 1;
         delete newData.selectedOption;
@@ -137,7 +137,11 @@ class AbsenceForm extends Component {
                     rowData.map((cellData, cellIndex) => (
                         <TouchableOpacity
                             key={cellIndex}
-                            onPress={() => { this.showPopupDialog(cellData, index, cellIndex); }}>
+                            onPress={() => {
+                                if (this.props.user.role === 'teacher' || this.props.user.role === 'admin') {
+                                    this.showPopupDialog(cellData, index, cellIndex);
+                                }
+                            }}>
                             <Cell
                                 key={cellIndex}
                                 data={cellData.type}
@@ -293,7 +297,8 @@ const mapStateToProps = state => {
         currAbsenceList: state.home.currAbsenceList,
         currAbsence: state.home.currAbsence,
         headerHeightArr: [dataHeight, ...state.home.students.map(() => dataHeight)],
-        students: state.home.students
+        students: state.home.students,
+        user: state.auth.user
     };
 };
 

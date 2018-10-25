@@ -368,6 +368,35 @@ const MainRouterTeacher = createStackNavigator({
 });
 
 
+const MainDrawerNavigatorParent = createDrawerNavigator({
+    Home: {
+        screen: HomeRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Home', 'home')
+    },
+    AbsenceRouter: {
+        screen: AbsenceRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Anwesenheit', 'open-book', 'entypo')
+    },
+    TimeSheetRouter: {
+        screen: TimeSheetRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Stundenpläne', 'clock-o', 'font-awesome')
+    },
+    MessageRouter: {
+        screen: MessageRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Nachrichten', 'message', 'entypo')
+    },
+    TerminRouter: {
+        screen: TerminRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Termine', 'calendar', 'entypo')
+    },
+    DokumentListRouter: {
+        screen: DokumentListRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Dokumente', 'documents', 'entypo')
+    }
+},
+    { contentComponent: DrawerContent }
+);
+
 const MainDrawerNavigatorOther = createDrawerNavigator({
     Home: {
         screen: HomeRouter,
@@ -413,8 +442,29 @@ const MainRouterOther = createStackNavigator({
     }
 });
 
+const MainRouterParent = createStackNavigator({
+    Drawer: {
+        screen: MainDrawerNavigatorParent,
+        navigationOptions: {
+            header: null
+        }
+    },
+    ProfilRouter: {
+        screen: ProfilForm,
+        navigationOptions: getHeaderOptionsWithBackButtonAndRightIcon({ title: 'Profil' },
+            {
+                name: 'edit',
+                typ: 'MaterialIcons',
+                onPress: (navigation) => {
+                    navigation.setParams({ modalVisible: true });
+                }
+            })
+    }
+});
+
 export const RootRouter = createSwitchNavigator({
     Auth: AuthRouter,
     MainTeacher: MainRouterTeacher,
     MainOther: MainRouterOther,
+    MainParent: MainRouterParent
 });

@@ -40,6 +40,23 @@ class GroupList extends Component {
         this.props.retrieveAllAbsenceLists(this.props.user.id);
     }
 
+    renderFab() {
+        if (this.props.user.role === 'teacher' || this.props.user.role === 'admin') {
+            return (
+                <Fab
+                    active
+                    direction="up"
+                    style={{ backgroundColor: '#8BC34A' }}
+                    position="bottomRight">
+                    <TouchableOpacity
+                        onPress={() => this.popupDialog.show()}>
+                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
+                    </TouchableOpacity>
+                </Fab>
+            );
+        }
+    }
+
     render() {
         if (this.props.error) {
             Alert.alert(
@@ -152,17 +169,10 @@ class GroupList extends Component {
                         },
                         isClassChooserModalVisible: false
                     })} />
-
-                <Fab
-                    active
-                    direction="up"
-                    style={{ backgroundColor: '#8BC34A' }}
-                    position="bottomRight">
-                    <TouchableOpacity
-                        onPress={() => this.popupDialog.show()}>
-                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
-                    </TouchableOpacity>
-                </Fab>
+                    
+                {
+                    this.renderFab()
+                }
             </View>
         );
     }

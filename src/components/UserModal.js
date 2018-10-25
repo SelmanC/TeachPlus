@@ -190,7 +190,11 @@ class UserModalWrapped extends Component {
                         <Icon name='group' type='font-awesome' size={40} color='#a09f9f' />
                         <Icon name='star' type='entypo' size={10} color='red' />
                         <TouchableOpacity
-                            onPress={() => this.setState({ isRoleModalVisible: true })}
+                            onPress={() => {
+                                if (this.props.roleVisible !== false) {
+                                    this.setState({ isRoleModalVisible: true });
+                                }
+                            }}
                             style={{ flex: 1 }}>
                             <FormInput
                                 placeholder='Rolle'
@@ -209,7 +213,11 @@ class UserModalWrapped extends Component {
                             <Icon name='child' type='font-awesome' size={50} color='#a09f9f' />
                             <Icon name='star' type='entypo' size={10} color='red' />
                             <TouchableOpacity
-                                onPress={() => this.setState({ isChildModalVisible: true })}
+                                onPress={() => {
+                                    if (this.props.roleVisible !== false) {
+                                        this.setState({ isChildModalVisible: true });
+                                    }
+                                }}
                                 style={{ flex: 1 }}>
                                 <FormInput
                                     placeholder='Kinder'

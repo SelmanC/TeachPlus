@@ -83,7 +83,6 @@ export const updateAbsenceData = (absenceList, absenceData, newAbsence, indexStu
             newAbsence);
     };
 };
-
 function onAbsenceListSaved(absenceList, savedAbsenceList, absenceData, dispatch) {
     if (absenceList.id) {
         const noteIndex = absenceData.findIndex(e => e.id === absenceList.id);

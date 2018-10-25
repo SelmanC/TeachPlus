@@ -53,7 +53,6 @@ class ProfilForm extends Component {
 
     render() {
         const user = this.props.user;
-        console.log('user', user)
         const modalVisible = this.props.navigation.getParam('modalVisible', false);
         return (
             <View style={{ flex: 1, backgroundColor: 'white', paddingBottom: 10 }}>
@@ -134,7 +133,8 @@ class ProfilForm extends Component {
                     onCancel={() => this.props.navigation.setParams({ modalVisible: false })}
                     onSave={(selectedItem) => { this.onSave(selectedItem); }}
                     selectedItem={user}
-                    childrenData={this.props.userData.filter(e => e.role === 'student')} />
+                    childrenData={this.props.userData.filter(e => e.role === 'student')} 
+                    roleVisible={false} />
             </View>
         );
     }
