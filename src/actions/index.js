@@ -3,3 +3,4 @@ export * from './HomeActions';
 export * from './UserGroupActions';
 export * from './AbsenceActions';
 export * from './TimeSheetActions';
+export * from './MessageActions';

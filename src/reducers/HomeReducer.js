@@ -9,6 +9,7 @@ import {
     USERS_RETRIEVED,
     USER_SELECTED,
     CHILDREN_RETRIEVED,
+    CURR_USER_UPDATED,
     NEW_USERDATA,
     GROUPS_RETRIEVED,
     NEW_GROUPDATA,
@@ -23,7 +24,10 @@ import {
     ALL_TIMESHEETS_RETRIEVED,
     NEW_TIMESHEET,
     TIMESHEET_SELCTED,
-    TIMESHEET_DATA_SAVED
+    TIMESHEET_DATA_SAVED,
+    ALL_MESSAGES_RETRIEVED,
+    MESSAGE_USER_SELECTED,
+    NEW_MESSAGE_DATA
 } from '../actions/types';
 
 const defaultUser = {
@@ -67,6 +71,14 @@ const defaultSelectedTimeSheet = {
     timeColumns: []
 };
 
+const defaultSelectedMessage = {
+    to: {
+        id: null,
+        name: ''
+    },
+    messages: []
+};
+
 const INITIAL_STATE = {
     showSpinner: false,
     vertretungsplanList: {},
@@ -84,7 +96,9 @@ const INITIAL_STATE = {
     currAbsence: [],
     students: [],
     timeSheetList: [],
-    currTimeSheet: Object.assign({}, defaultSelectedTimeSheet)
+    currTimeSheet: Object.assign({}, defaultSelectedTimeSheet),
+    messageList: {},
+    currMessage: Object.assign({}, defaultSelectedMessage)
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -139,6 +153,12 @@ export default (state = INITIAL_STATE, action) => {
             return { ...state, currTimeSheet: { ...action.payload } };
         case TIMESHEET_DATA_SAVED:
             return { ...state, currTimeSheet: { ...action.payload.timeSheet }, timeSheetList: [...action.payload.timeSheetList] };
+        case ALL_MESSAGES_RETRIEVED:
+            return { ...state, messageList: { ...action.payload }, showSpinner: false };
+        case MESSAGE_USER_SELECTED:
+            return { ...state, currMessage: { ...action.payload } };
+        case NEW_MESSAGE_DATA:
+            return { ...state, messageList: { ...action.payload } };
         default:
             return state;
     }

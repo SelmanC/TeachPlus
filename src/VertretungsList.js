@@ -121,6 +121,23 @@ class VertretungsList extends Component {
         });
     }
 
+    renderAddFab() {
+        if (this.props.user.role === 'teacher' || this.props.user.role === 'admin') {
+            return (
+                <Fab
+                    active
+                    direction="up"
+                    style={{ backgroundColor: '#8BC34A' }}
+                    position="bottomRight">
+                    <TouchableOpacity
+                        onPress={() => this.setState({ modalVisible: true })}>
+                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
+                    </TouchableOpacity>
+                </Fab>
+            );
+        }
+    }
+
     render() {
         return (
             <View style={{ backgroundColor: 'white', flex: 1 }}>
@@ -145,21 +162,12 @@ class VertretungsList extends Component {
                     })}
                     onDelete={() => { this.onDelete(); }}
                     onSave={(selectedItem) => { this.onSave(selectedItem); }}
-                    selectedItem={this.state.selectedItem} 
+                    selectedItem={this.state.selectedItem}
                     teachers={this.props.teachers}
                     groups={this.props.groupData} />
-
-                <Fab
-                    active
-                    direction="up"
-                    style={{ backgroundColor: '#8BC34A' }}
-                    position="bottomRight">
-                    <TouchableOpacity
-                        onPress={() => this.setState({ modalVisible: true })}>
-                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
-                    </TouchableOpacity>
-                </Fab>
-
+                {
+                    this.renderAddFab()
+                }
             </View>
         );
     }
@@ -173,6 +181,7 @@ const mapStateToProps = state => {
         vertetungsData: state.home.vertretungsplanList,
         teachers: state.home.teachers,
         groupData: state.home.groupData,
+        user: state.auth.user
     };
 };
 

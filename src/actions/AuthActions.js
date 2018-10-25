@@ -43,7 +43,11 @@ export const loginUser = (email, password, workspaceId, navigation) => {
                         'Fehler beim Abrufen der Gruppen',
                         groups => {
                             dispatch({ type: LOGIN_SUCCESS, payload: { user, groups } });
-                            navigation.navigate('Main');
+                            if (user.role === 'teacher' || user.role === 'admin') {
+                                navigation.navigate('MainTeacher');
+                            } else {
+                                navigation.navigate('MainOther');
+                            }
                         },
                         error => dispatch({ type: LOGIN_FAIL, payload: error.message }));
                 },

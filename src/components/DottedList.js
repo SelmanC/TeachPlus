@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
 import { List, ListItem, Icon } from 'react-native-elements';
 
@@ -16,6 +16,25 @@ class DottedList extends Component {
         };
     }
 
+    renderDotIcon(key) {
+        if (this.props.showDots !== false) {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        this.setState({ selectedColumn: key });
+                        this.popupDialog.show();
+                    }}>
+                    <Icon
+                        name='dots-three-vertical'
+                        type='entypo'
+                        size={20}
+                        color='#a09f9f' />
+                </TouchableOpacity>
+            );
+        }
+        return <View />;
+    }
+
     renderListItems() {
         return this.props.listData.map((listIem, key) => (
             <TouchableOpacity
@@ -24,19 +43,7 @@ class DottedList extends Component {
                 <ListItem
                     title={listIem.name}
                     subtitle={listIem.groupClass ? `Klasse: ${listIem.groupClass.name}` : ''}
-                    rightIcon={
-                        <TouchableOpacity
-                            onPress={() => {
-                                this.setState({ selectedColumn: key });
-                                this.popupDialog.show();
-                            }}>
-                            <Icon
-                                name='dots-three-vertical'
-                                type='entypo'
-                                size={20} 
-                                color='#a09f9f' />
-                        </TouchableOpacity>
-                    } />
+                    rightIcon={this.renderDotIcon(key)} />
             </TouchableOpacity>
         ));
     }

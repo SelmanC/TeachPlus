@@ -6,7 +6,7 @@ import PopupDialog, { SlideAnimation } from 'react-native-popup-dialog';
 import { Fab, Icon, Form, Item, Input, Label } from 'native-base';
 import { SearchTextInput, FilteredList, ListModal } from './components';
 import { getDaysInMonth } from './other';
-import { retrieveAbsenceList, retrieveAllAbsenceLists, addAbsenceList, removeError } from './actions';
+import { retrieveAbsenceList, retrieveAllAbsenceLists, addAbsenceList, removeError, retriveTeacher } from './actions';
 
 const slideAnimation = new SlideAnimation({
     slideFrom: 'bottom',
@@ -36,6 +36,7 @@ class GroupList extends Component {
     }
 
     componentDidMount() {
+        this.props.retriveTeacher();
         this.props.retrieveAllAbsenceLists(this.props.user.id);
     }
 
@@ -192,6 +193,7 @@ const mapStateToProps = state => {
 
 export default connect(mapStateToProps, {
     retrieveAbsenceList,
+    retriveTeacher,
     retrieveAllAbsenceLists,
     addAbsenceList,
     removeError

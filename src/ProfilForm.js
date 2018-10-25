@@ -1,12 +1,22 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { connect } from 'react-redux';
 import { Avatar, Divider } from 'react-native-elements';
 import { UserModal } from './components';
 import { getDifferentStringsFromArray, getStringFromArray } from './other';
+import { updateCurrUser, retriveChildren, retriveAllUsers } from './actions';
 
 class ProfilForm extends Component {
+    componentDidMount() {
+        if (this.props.user.role === 'parent') {
+            this.props.retriveChildren(this.props.user.id);
+        }
+        this.props.retriveAllUsers();
+    }
+
     onSave(newItem) {
-        this.props.navigation.setParams({ modalVisible: false, user: newItem });
+        this.props.navigation.setParams({ modalVisible: false });
+        this.props.updateCurrUser(newItem);
     }
 
     getChildrenOrParentsString(user) {
@@ -21,20 +31,19 @@ class ProfilForm extends Component {
         return `${user.name} ${user.lastname}`;
     }
 
-    renderArrayText(user) {
-        return user.groups.length > 0 ?
-            getStringFromArray(user.groups, 'name', '\n') : '/';
+    renderArrayText() {
+        return this.props.groups.length > 0 ?
+            getStringFromArray(this.props.groups, 'name', '\n') : '/';
     }
 
-    renderParentText(user) {
-        const { role, parents, children } = user;
-        if (role.value === 'student') {
-            return parents.length > 0 ?
-                getDifferentStringsFromArray(parents, ['name', 'lastname'], '\n') : '/';
-        }
+    renderParentText() {
+        /* if (role.value === 'student') {
+             return parents.length > 0 ?
+                 getDifferentStringsFromArray(parents, ['name', 'lastname'], '\n') : '/';
+         }*/
 
-        return children.length > 0 ?
-            getDifferentStringsFromArray(children, ['name', 'lastname'], '\n') : '/';
+        return this.props.children.length > 0 ?
+            getDifferentStringsFromArray(this.props.children, ['name', 'lastname'], '\n') : '/';
     }
 
     renderAdress(user) {
@@ -43,7 +52,8 @@ class ProfilForm extends Component {
     }
 
     render() {
-        const user = this.props.navigation.getParam('user');
+        const user = this.props.user;
+        console.log('user', user)
         const modalVisible = this.props.navigation.getParam('modalVisible', false);
         return (
             <View style={{ flex: 1, backgroundColor: 'white', paddingBottom: 10 }}>
@@ -78,7 +88,7 @@ class ProfilForm extends Component {
                                 {this.renderFieldText(user.email)}
                             </Text>
                         </View>
-                        
+
                         <View>
                             <Divider style={styles.dividerStyle} />
                             <Text style={styles.titleStyle}>Alter</Text>
@@ -95,13 +105,16 @@ class ProfilForm extends Component {
                             </Text>
                         </View>
 
-                        <View>
-                            <Divider style={styles.dividerStyle} />
-                            <Text style={styles.titleStyle}>{this.getChildrenOrParentsString(user)}</Text>
-                            <Text style={styles.textStyle}>
-                                {this.renderParentText(user)}
-                            </Text>
-                        </View>
+                        {
+                            user.role === 'parent' &&
+                            < View >
+                                <Divider style={styles.dividerStyle} />
+                                <Text style={styles.titleStyle}>{this.getChildrenOrParentsString(user)}</Text>
+                                <Text style={styles.textStyle}>
+                                    {this.renderParentText(user)}
+                                </Text>
+                            </View>
+                        }
 
                         <View>
                             <Divider style={styles.dividerStyle} />
@@ -120,7 +133,8 @@ class ProfilForm extends Component {
                     modalVisible={modalVisible}
                     onCancel={() => this.props.navigation.setParams({ modalVisible: false })}
                     onSave={(selectedItem) => { this.onSave(selectedItem); }}
-                    selectedItem={user} />
+                    selectedItem={user}
+                    childrenData={this.props.userData.filter(e => e.role === 'student')} />
             </View>
         );
     }
@@ -157,4 +171,17 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ProfilForm;
+const mapStateToProps = state => {
+    return {
+        user: state.auth.user,
+        groups: state.auth.groups,
+        userData: state.home.userData,
+        children: state.home.currChildren
+    };
+};
+
+export default connect(mapStateToProps, {
+    updateCurrUser,
+    retriveChildren,
+    retriveAllUsers
+})(ProfilForm);

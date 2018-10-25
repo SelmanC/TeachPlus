@@ -1,4 +1,4 @@
-import { LOGIN, LOGIN_SUCCESS, LOGIN_FAIL, WORKSPACE_CHANGED, WORKSPACE_CHECK, WORKSPACE_CHECK_SUCCESS, WORKSPACE_CHECK_FAIL } from '../actions/types';
+import { LOGIN, LOGIN_SUCCESS, LOGIN_FAIL, WORKSPACE_CHANGED, WORKSPACE_CHECK, WORKSPACE_CHECK_SUCCESS, WORKSPACE_CHECK_FAIL, CURR_USER_UPDATED } from '../actions/types';
 
 const INITIAL_STATE = {
     showSpinner: false,
@@ -25,6 +25,8 @@ export default (state = INITIAL_STATE, action) => {
             return { ...state, showSpinner: true, error: '' };
         case LOGIN_SUCCESS:
             return { ...state, showSpinner: false, ...action.payload };
+        case CURR_USER_UPDATED:
+            return { ...state, user: { ...action.payload } };
         case LOGIN_FAIL:
             return { ...state, showSpinner: false, error: action.payload };
         default:

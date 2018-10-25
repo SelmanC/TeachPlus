@@ -20,8 +20,9 @@ export const NOTES_RETRIEVED = 'notes_retrieved';
 export const NEW_NOTESDATA = 'new_note';
 
 export const USERS_RETRIEVED = 'users_retrieved';
+export const CURR_USER_UPDATED = 'curr_user_updated';
 export const USER_SELECTED = 'user_selected';
-export const CHILDREN_RETRIEVED = 'parents_retrieved';
+export const CHILDREN_RETRIEVED = 'childreb_retrieved';
 export const NEW_USERDATA = 'new_user';
 
 export const TEACHERS_RETRIEVED = 'teachers_retrieved';
@@ -42,5 +43,9 @@ export const TIMESHEET_RETRIEVED = 'retrieve_timesheet';
 export const TIMESHEET_SELCTED = 'timesheet_selected';
 export const TIMESHEET_DATA_SAVED = 'timesheet_data_saved';
 
+export const ALL_MESSAGES_RETRIEVED = 'retrieve_all_messages';
+export const NEW_MESSAGE = 'new_message';
+export const MESSAGE_USER_SELECTED = 'message_user_selected';
+export const NEW_MESSAGE_DATA = 'message_saved';
 
 export const ERROR_SHOWN = 'error_shown';

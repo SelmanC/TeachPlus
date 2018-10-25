@@ -11,7 +11,8 @@ import {
     CLOSE_MODAL,
     CHILDREN_RETRIEVED,
     USER_SELECTED,
-    TEACHERS_RETRIEVED
+    TEACHERS_RETRIEVED,
+    CURR_USER_UPDATED
 } from './types';
 
 export const closeModal = () => {
@@ -77,6 +78,28 @@ export const addUser = (user, userData) => {
                         user.children);
                 } else {
                     onUserSave(user, data, userData, dispatch);
+                }
+            },
+            error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
+            user);
+    };
+};
+
+export const updateCurrUser = (user) => {
+    return (dispatch) => {
+        postMethod(
+            'users',
+            'Fehler beim Speichern des Benutzers',
+            data => {
+                if (user.role === 'parent') {
+                    postMethod(
+                        `users/${user.id ? user.id : data.id}/children`,
+                        'Fehler beim Speichern der Kinder',
+                        () => onCurrUserSaved(user, data, dispatch),
+                        error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
+                        user.children);
+                } else {
+                    onCurrUserSaved(user, data, dispatch);
                 }
             },
             error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
@@ -169,6 +192,11 @@ function onUserSave(user, savedUser, userData, dispatch) {
         userData.push(savedUser);
     }
     dispatch({ type: NEW_USERDATA, payload: userData });
+}
+
+function onCurrUserSaved(user, currUser, dispatch) {
+    currUser.children = user.children;
+    dispatch({ type: CURR_USER_UPDATED, payload: currUser });
 }
 
 function onGroupSave(group, savedGroup, groupData, dispatch) {

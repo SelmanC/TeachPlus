@@ -112,6 +112,10 @@ class TimeSheet extends Component {
         return returnDate;
     }
 
+    isTeacherOrAdmin() {
+        return this.props.user.role === 'teacher' || this.props.user.role === 'admin';
+    }
+
     saveSubject(subjectData) {
         const { selectedColumn, selectedRow } = this.state;
 
@@ -175,12 +179,14 @@ class TimeSheet extends Component {
             <TouchableOpacity
                 key={key}
                 onPress={() => {
-                    this.setState({
-                        selectedCourse,
-                        selectedColumn,
-                        selectedRow
-                    });
-                    this.popupDialog.show();
+                    if (this.isTeacherOrAdmin()) {
+                        this.setState({
+                            selectedCourse,
+                            selectedColumn,
+                            selectedRow
+                        });
+                        this.popupDialog.show();
+                    }
                 }}>
                 <Cell
                     key={key}
@@ -229,7 +235,11 @@ class TimeSheet extends Component {
             >
                 <TouchableOpacity
                     key={column.timesheetColumn}
-                    onPress={() => this.renderAlertMessageForTime(column.timesheetColumn)}>
+                    onPress={() => {
+                        if (this.isTeacherOrAdmin()) {
+                            this.renderAlertMessageForTime(column.timesheetColumn);
+                        }
+                    }}>
                     <Cell
                         key={0}
                         data={this.getFirstRowName(column)}
@@ -248,12 +258,14 @@ class TimeSheet extends Component {
             <TouchableOpacity
                 key={key}
                 onPress={() => {
-                    this.setState({
-                        selectedCourse: Object.assign({}, defaultValueCelectedCourse),
-                        selectedColumn: { ...this.state.selectedColumn, timesheetColumn: column },
-                        selectedRow: { ...this.state.selectedRow, timesheetRow: row }
-                    });
-                    this.popupDialog.show();
+                    if (this.isTeacherOrAdmin()) {
+                        this.setState({
+                            selectedCourse: Object.assign({}, defaultValueCelectedCourse),
+                            selectedColumn: { ...this.state.selectedColumn, timesheetColumn: column },
+                            selectedRow: { ...this.state.selectedRow, timesheetRow: row }
+                        });
+                        this.popupDialog.show();
+                    }
                 }}>
                 <Cell
                     key={key}
@@ -280,7 +292,11 @@ class TimeSheet extends Component {
             >
                 <TouchableOpacity
                     key={column}
-                    onPress={() => { this.renderAlertMessageForTime(column); }}>
+                    onPress={() => {
+                        if (this.isTeacherOrAdmin()) {
+                            this.renderAlertMessageForTime(column);
+                        }
+                    }}>
                     <Cell
                         key={0}
                         data={`${column + 1}`}
@@ -416,6 +432,7 @@ const mapStateToProps = state => {
         timeSheetList: state.home.timeSheetList,
         error: state.home.error,
         teachers: state.home.teachers,
+        user: state.auth.user
     };
 };
 

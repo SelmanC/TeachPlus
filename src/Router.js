@@ -19,7 +19,6 @@ import DokumentList from './DokumentList';
 import UserList from './UserList';
 import GroupList from './GroupList';
 import ProfilForm from './ProfilForm';
-import { CurrUser } from './other';
 
 const getDefaultHeaderOptions = (props) => {
     return ({ navigation }) => ({
@@ -117,7 +116,7 @@ const DrawerContent = (props) => (
             }}
         >
             <TouchableOpacity
-                onPress={() => props.navigation.navigate('ProfilRouter', { user: CurrUser })}>
+                onPress={() => props.navigation.navigate('ProfilRouter')}>
                 <View style={{ borderColor: 'white', height: 100, width: 100, borderWidth: 2, borderRadius: 50, alignItems: 'center', justifyContent: 'center' }}>
                     <Icon
                         name={'person'}
@@ -130,7 +129,7 @@ const DrawerContent = (props) => (
         <DrawerItems {...props} />
 
         <TouchableOpacity
-            onPress={() => props.navigation.navigate('Auth', { user: CurrUser })}
+            onPress={() => props.navigation.navigate('Auth')}
         >
             <View style={[{ flexDirection: 'row', alignItems: 'center' }, {}]}>
                 <View style={[{ marginHorizontal: 16, width: 24, alignItems: 'center' }, { opacity: 0.62 }, {}]}>
@@ -274,7 +273,7 @@ const MessageRouter = createStackNavigator({
                 </TouchableOpacity>
             ),
             ...GlobalStyles.headerStyle,
-            title: navigation.getParam('messageItem', { teacher: '' }).to
+            title: navigation.getParam('messageItem', { title: '' }).title
         })
     },
     MessageableList: {
@@ -311,7 +310,7 @@ const GroupRouter = createStackNavigator({
     }
 });
 
-const MainDrawerNavigator = createDrawerNavigator({
+const MainDrawerNavigatorTeacher = createDrawerNavigator({
     Home: {
         screen: HomeRouter,
         navigationOptions: getDefaultDrawerNavigationOptions('Home', 'home')
@@ -348,9 +347,55 @@ const MainDrawerNavigator = createDrawerNavigator({
     { contentComponent: DrawerContent }
 );
 
-const MainRouter = createStackNavigator({
+const MainRouterTeacher = createStackNavigator({
     Drawer: {
-        screen: MainDrawerNavigator,
+        screen: MainDrawerNavigatorTeacher,
+        navigationOptions: {
+            header: null
+        }
+    },
+    ProfilRouter: {
+        screen: ProfilForm,
+        navigationOptions: getHeaderOptionsWithBackButtonAndRightIcon({ title: 'Profil' },
+            {
+                name: 'edit',
+                typ: 'MaterialIcons',
+                onPress: (navigation) => {
+                    navigation.setParams({ modalVisible: true });
+                }
+            })
+    }
+});
+
+
+const MainDrawerNavigatorOther = createDrawerNavigator({
+    Home: {
+        screen: HomeRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Home', 'home')
+    },
+    TimeSheetRouter: {
+        screen: TimeSheetRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Stundenpläne', 'clock-o', 'font-awesome')
+    },
+    MessageRouter: {
+        screen: MessageRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Nachrichten', 'message', 'entypo')
+    },
+    TerminRouter: {
+        screen: TerminRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Termine', 'calendar', 'entypo')
+    },
+    DokumentListRouter: {
+        screen: DokumentListRouter,
+        navigationOptions: getDefaultDrawerNavigationOptions('Dokumente', 'documents', 'entypo')
+    }
+},
+    { contentComponent: DrawerContent }
+);
+
+const MainRouterOther = createStackNavigator({
+    Drawer: {
+        screen: MainDrawerNavigatorOther,
         navigationOptions: {
             header: null
         }
@@ -370,5 +415,6 @@ const MainRouter = createStackNavigator({
 
 export const RootRouter = createSwitchNavigator({
     Auth: AuthRouter,
-    Main: MainRouter,
+    MainTeacher: MainRouterTeacher,
+    MainOther: MainRouterOther,
 });

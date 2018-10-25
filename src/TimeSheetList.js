@@ -62,6 +62,7 @@ class TimeSheetList extends Component {
         return (
             <DottedList
                 listData={this.props.timeSheetList}
+                showDots={false}
                 onListItemPressed={(timeSheet) => {
                     this.props.selectTimeSheet(timeSheet);
                     this.props.navigation.navigate('TimeSheet');
@@ -77,6 +78,23 @@ class TimeSheetList extends Component {
                 }}
             />
         );
+    }
+
+    renderAddFab() {
+        if (this.props.user.role === 'teacher' || this.props.user.role === 'admin') {
+            return (
+                <Fab
+                    active
+                    direction="up"
+                    style={{ backgroundColor: '#8BC34A' }}
+                    position="bottomRight">
+                    <TouchableOpacity
+                        onPress={() => this.popupDialog.show()}>
+                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
+                    </TouchableOpacity>
+                </Fab>
+            );
+        }
     }
 
     render() {
@@ -167,17 +185,9 @@ class TimeSheetList extends Component {
                         isClassChooserModalVisible: false
                     })} />
 
-                <Fab
-                    active
-                    direction="up"
-                    style={{ backgroundColor: '#8BC34A' }}
-                    position="bottomRight">
-                    <TouchableOpacity
-                        onPress={() => this.popupDialog.show()}>
-                        <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
-                    </TouchableOpacity>
-                </Fab>
-
+                {
+                    this.renderAddFab()
+                }
             </Container >
         );
     }
@@ -200,7 +210,8 @@ const mapStateToProps = state => {
     return {
         groups: state.auth.groups,
         timeSheetList: state.home.timeSheetList,
-        error: state.home.error
+        error: state.home.error,
+        user: state.auth.user
     };
 };
 
