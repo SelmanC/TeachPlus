@@ -62,10 +62,10 @@ class TimeSheetList extends Component {
         return (
             <DottedList
                 listData={this.props.timeSheetList}
-                showDots={false}
+                showDots={this.props.user.role === 'teacher'}
                 onListItemPressed={(timeSheet) => {
                     this.props.selectTimeSheet(timeSheet);
-                    this.props.navigation.navigate('TimeSheet');
+                    this.props.navigation.navigate('TimeSheet', { timeSheet });
                 }}
                 onCopyPressed={(cell) => {
                     this.setState({

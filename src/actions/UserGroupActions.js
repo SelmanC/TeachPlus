@@ -156,7 +156,7 @@ export const addGroup = (group, groupData) => {
                 postMethod(
                     `groups/${group.id ? group.id : data.id}/members`,
                     'Fehler beim Speichern der Gruppenmitglieder',
-                    memberData => onGroupMemberSaved(group, memberData, groupData, dispatch),
+                    memberData => onGroupMemberSaved(data, memberData, groupData, dispatch),
                     error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
                     group.groupOwner);
             },

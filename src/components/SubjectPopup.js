@@ -84,7 +84,8 @@ class SubjectPopup extends Component {
     }
 
     renderAddNewFabItem(selectedItem) {
-        if (!this.state.active || !selectedItem.id || false) return;
+        /*
+        if (!this.state.active || !selectedItem.id) return;
 
         return (
             <Button
@@ -92,7 +93,7 @@ class SubjectPopup extends Component {
                 onPress={() => { this.setNewAbsenceValue(); }}>
                 <Icon name="add" type='MaterialIcons' style={{ color: 'white' }} />
             </Button>
-        );
+        );*/
     }
 
     renderFabs(selectedItem) {

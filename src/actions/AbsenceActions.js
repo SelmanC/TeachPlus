@@ -66,7 +66,7 @@ export const retrieveAbsenceList = (absenceList, selectedDate, daysInMonth, navi
             'Fehler beim Abrufen der Anwesenheitsliste',
             data => {
                 updateTableData(absenceList, data, selectedDate, daysInMonth, dispatch);
-                if (navigation) navigation.navigate('AbsenceForm');
+                if (navigation) navigation.navigate('AbsenceForm', { group: absenceList.groupClass });
             },
             error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }));
     };

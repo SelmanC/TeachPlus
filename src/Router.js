@@ -249,7 +249,7 @@ const TimeSheetRouter = createStackNavigator({
                 </TouchableOpacity>
             ),
             ...GlobalStyles.headerStyle,
-            title: navigation.getParam('timeSheet', { name: '' }).Name
+            title: `${navigation.getParam('timeSheet', { name: '', groupClass: { name: '' } }).groupClass.name} - ${navigation.getParam('timeSheet', { name: '', groupClass: { name: '' } }).name}`
         })
     }
 });

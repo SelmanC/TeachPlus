@@ -17,13 +17,15 @@ export const retrieveVertretungsplan = (groupIds) => {
 };
 
 export const addVertretungsplan = (vertretungsplan, newVertretungsplan, vertretungsplanList) => {
+    const savedVertetung = newVertretungsplan.substitute.id ? newVertretungsplan : { ...newVertretungsplan, substitute: null };
+    
     return (dispatch) => {
         postMethod(
             'vertretung',
             'Fehler beim Speichern des Vertreungsplans',
             data => onVertretungSave(vertretungsplan, data, vertretungsplanList, dispatch),
             error => dispatch({ type: ERROR_RETRIEVED, payload: error.message }),
-            newVertretungsplan);
+            { ...savedVertetung });
     };
 };
 
@@ -113,12 +115,11 @@ function onVertretungSave(vertretungsplan, savedVertretungsplan, vertetungsData,
     } else if (!vertetungsData[dateString][savedVertretungsplan.groupClass.name]) {
         vertetungsData[dateString][savedVertretungsplan.groupClass.name] = savedVertretungsplan;
     } else if (!vertretungsplan.id || !isSameDay(vertretungsplan.date, savedVertretungsplan.date)) {
-        vertetungsData[dateString][vertretungsplan.groupClass.name].push(savedVertretungsplan);
+        vertetungsData[dateString][savedVertretungsplan.groupClass.name].push(savedVertretungsplan);
     } else {
-        const itemIndex = vertetungsData[dateString][vertretungsplan.groupClass.name].findIndex(c => c.id === vertretungsplan.id);
-        vertetungsData[dateString][vertretungsplan.groupClass.name][itemIndex] = savedVertretungsplan;
+        const itemIndex = vertetungsData[dateString][savedVertretungsplan.groupClass.name].findIndex(c => c.id === vertretungsplan.id);
+        vertetungsData[dateString][savedVertretungsplan.groupClass.name][itemIndex] = savedVertretungsplan;
     }
-
     dispatch({ type: NEW_VERTRETUNGSDATA, payload: vertetungsData });
 }
 

@@ -101,7 +101,7 @@ export const deleteStundenplan = (timeSheet, timeSheetList) => {
             `timesheets/${timeSheet.id}`,
             'Fehler beim Löschen des Vertreungsplans',
             () => {
-                const index = timeSheetList.findIndex(e => e.id === timeSheet);
+                const index = timeSheetList.findIndex(e => e.id === timeSheet.id);
                 timeSheetList.splice(index, 1);
                 dispatch({ type: NEW_TIMESHEET, payload: timeSheetList });
             },

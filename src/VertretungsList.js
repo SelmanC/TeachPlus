@@ -65,7 +65,7 @@ class VertretungsList extends Component {
 
     getVertretungsDescription(vertretung) {
         const subjectName = vertretung.subject;
-        const teacherString = vertretung.substitute.name ? ` bei ${vertretung.substitute.name}` : '';
+        const teacherString = vertretung.substitute ? ` bei ${vertretung.substitute.name}` : '';
         const roomString = vertretung.room ? ` in ${vertretung.room}` : '';
 
         return `${subjectName}${teacherString}${roomString}`;

@@ -53,8 +53,8 @@ class AbsenceForm extends Component {
         this.popupDialog.dismiss();
     }
 
-    getSelectedStudentName() {
-        return this.props.students[this.state.selectedCell.studentIndex + 1];
+    getSelectedStudent() {
+        return this.props.students[this.state.selectedCell.studentIndex];
     }
 
     getSelectedDay() {
@@ -188,7 +188,7 @@ class AbsenceForm extends Component {
 
                 <AbsencePopup
                     selectedCell={this.state.selectedCell}
-                    student={this.getSelectedStudentName()}
+                    student={this.getSelectedStudent()}
                     selectedDay={this.getSelectedDay()}
                     selectedMonth={this.state.month}
                     onAbsenceChanged={this.setNewTypeValue.bind(this)}

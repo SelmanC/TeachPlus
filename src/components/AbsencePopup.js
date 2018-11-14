@@ -25,7 +25,8 @@ class AbsencePopup extends Component {
 
     getPopupTitle() {
         const { student, selectedDay, selectedMonth } = this.props;
-        return `${student} - ${selectedDay}.${selectedMonth}`;
+        const name = student ? `${student.name} ${student.lastname}` : '';
+        return `${name} - ${selectedDay}.${selectedMonth}`;
     }
 
     setPopupSelectedOption(selectedOption) {

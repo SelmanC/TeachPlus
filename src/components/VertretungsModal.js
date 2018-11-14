@@ -164,15 +164,25 @@ class VertretungsModal extends Component {
 
     render() {
         const selectedItem = this.state.modalShown ? this.state.selectedItem : this.props.selectedItem;
+        if (!selectedItem.substitute) {
+            selectedItem.substitute = Object.assign({}, defaultSelectedHeader.substitute);
+        }
+
         return (
             <ModalWithHeader
                 headerText='Vertretungsplan'
                 isVisible={this.props.modalVisible}
                 renderHeaderDeleteButton={selectedItem.id}
-                onShow={() => this.setState({
-                    selectedItem: Object.assign({}, this.props.selectedItem),
-                    modalShown: true
-                })}
+                onShow={() => {
+                    const newSelectedItem = Object.assign({}, this.props.selectedItem);
+                    if (!newSelectedItem.substitute) {
+                        newSelectedItem.substitute = Object.assign({}, defaultSelectedHeader.substitute);
+                    }
+                    this.setState({
+                        selectedItem: newSelectedItem,
+                        modalShown: true
+                    });
+                }}
                 onCancel={() => this.onCancel()}
                 onSave={() => this.onSave()}
                 onDelete={() => this.onDelete()}>
