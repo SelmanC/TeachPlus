@@ -1,6 +1,6 @@
 /* global fetch:false */
 
-const serverURL = 'http://localhost:8080/';
+const serverURL = 'https://www.teachplus.de/';
 
 export const getMethod = (url, errorMessage, successCallback, errorCallback, options) => {
     fetch(`${serverURL}${url}`, options)
