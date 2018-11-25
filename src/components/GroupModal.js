@@ -97,7 +97,8 @@ class GroupModal extends Component {
                             })}
                             containerStyle={styles.containerFormInputStyle}
                             placeholderTextColor='#828080'
-                            inputStyle={styles.formInputFieldStyle} />
+                            inputStyle={styles.formInputFieldStyle} 
+                            underlineColorAndroid='#a09f9f' />
                     </View>
 
                     <View style={styles.modalFormFieldContainerStyle}>
@@ -113,7 +114,8 @@ class GroupModal extends Component {
                                 pointerEvents="none"
                                 containerStyle={styles.containerFormInputStyle}
                                 placeholderTextColor='#828080'
-                                inputStyle={styles.formInputFieldStyle} />
+                                inputStyle={styles.formInputFieldStyle} 
+                                underlineColorAndroid='#a09f9f' />
                         </TouchableOpacity>
                     </View>
 
@@ -152,7 +154,8 @@ const styles = StyleSheet.create({
         padding: 10,
         marginBottom: 15,
         marginTop: 5,
-        flex: 1
+        flex: 1,
+        textAlignVertical: 'top'
     },
     modalFormFieldContainerStyle: {
         flexDirection: 'row',

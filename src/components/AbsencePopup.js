@@ -71,7 +71,8 @@ class AbsencePopup extends Component {
                         value={minutes}
                         maxLength={3}
                         textAlign={'center'}
-                        inputStyle={{ color: 'black', width: 50 }} />
+                        inputStyle={{ color: 'black', width: 50 }} 
+                        underlineColorAndroid='#a09f9f' />
                     <Text>Minuten</Text>
                 </View>
             );

@@ -111,8 +111,8 @@ class TimeSheetList extends Component {
 
 
         return (
-            <Container>
-                <Content bounces={false} >
+            <View style={{ flex: 1 }}>
+                <View style={{ flex: 1 }}>
 
                     {
                         this.renderTimeSheets()
@@ -121,7 +121,8 @@ class TimeSheetList extends Component {
                     <PopupDialog
                         ref={popupDialog => { this.popupDialog = popupDialog; }}
                         dialogAnimation={slideAnimation}
-                        height={0.4}
+                        dismissOnTouchOutside={false}
+                        height={0.3}
                         onDismissed={() => this.setState({
                             selectedItem: Object.assign({}, defaultSelectedItem),
                             copyTimeSheetCell: null
@@ -147,7 +148,8 @@ class TimeSheetList extends Component {
                                         editable={false}
                                         pointerEvents="none"
                                         placeholderTextColor='#828080'
-                                        inputStyle={styles.formInputFieldStyle} />
+                                        inputStyle={styles.formInputFieldStyle} 
+                                        underlineColorAndroid='#a09f9f' />
                                 </TouchableOpacity>
                             </Form>
 
@@ -170,7 +172,7 @@ class TimeSheetList extends Component {
                             </View>
                         </View>
                     </PopupDialog>
-                </Content>
+                </View>
 
 
                 <ListModal
@@ -188,7 +190,7 @@ class TimeSheetList extends Component {
                 {
                     this.renderAddFab()
                 }
-            </Container >
+            </View>
         );
     }
 }

@@ -131,7 +131,8 @@ class GroupList extends Component {
                                     editable={false}
                                     pointerEvents="none"
                                     placeholderTextColor='#828080'
-                                    inputStyle={styles.formInputFieldStyle} />
+                                    inputStyle={styles.formInputFieldStyle} 
+                                    underlineColorAndroid='#a09f9f' />
                             </TouchableOpacity>
                         </Form>
 

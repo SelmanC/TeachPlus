@@ -182,7 +182,8 @@ class SubjectPopup extends Component {
                                     pointerEvents="none"
                                     placeholderTextColor='#333333'
                                     containerStyle={{ width: 200 }}
-                                    inputStyle={styles.formInputFieldStyle} />
+                                    inputStyle={styles.formInputFieldStyle} 
+                                    underlineColorAndroid='#a09f9f' />
                             </TouchableOpacity>
                         </View>
 
@@ -194,7 +195,8 @@ class SubjectPopup extends Component {
                                 value={this.state.selectedItem.room}
                                 placeholderTextColor='#333333'
                                 containerStyle={{ width: 200 }}
-                                inputStyle={styles.formInputFieldStyle} />
+                                inputStyle={styles.formInputFieldStyle} 
+                                underlineColorAndroid='#a09f9f' />
                         </View>
                     </View>
 
@@ -283,7 +285,8 @@ class SubjectPopup extends Component {
                                 })}
                                 value={selectedItem.subject}
                                 containerStyle={styles.subjectPickerStyle}
-                                inputStyle={styles.formInputFieldStyle} />
+                                inputStyle={styles.formInputFieldStyle} 
+                                underlineColorAndroid='#a09f9f' />
                         </Item>
 
                         {

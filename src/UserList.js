@@ -42,7 +42,7 @@ class UserList extends Component {
     }
 
     onSave(newItem) {
-        this.props.addUser(newItem, this.props.userData);
+        this.props.addUser({ ...newItem, workSpace: this.props.workSpace }, this.props.userData);
 
         this.setState({
             selectedItem: Object.assign({}, defaultSelectedItem),
@@ -88,8 +88,10 @@ class UserList extends Component {
 }
 
 const mapStateToProps = state => {
+    console.log('state', state.auth);
     return {
         userData: state.home.userData,
+        workSpace: state.auth.workSpace
     };
 };
 

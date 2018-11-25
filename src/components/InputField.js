@@ -23,7 +23,8 @@ class InputField extends Component {
                     onChangeText={onChangeText} 
                     containerStyle={style} 
                     value={value} 
-                    secureTextEntry={secureTextEntry} />
+                    secureTextEntry={secureTextEntry} 
+                    underlineColorAndroid='#a09f9f' />
                 {this.showValidationMessage()}
             </View>
         );

@@ -12,7 +12,6 @@ class FilteredList extends Component {
 
     renderListItem(item) {
         if (this.props.showSubtitle !== false && (item.email || item.subject)) {
-            
             let subtitle = '';
             if (item.email) subtitle = item.email;
             else if (item.subject) subtitle = item.subject;

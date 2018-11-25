@@ -50,7 +50,7 @@ class DottedList extends Component {
 
     render() {
         return (
-            <List containerStyle={{ marginTop: 0 }}>
+            <List containerStyle={{ marginTop: 0, flex: 1 }}>
                 {
                     this.renderListItems()
                 }
@@ -58,7 +58,7 @@ class DottedList extends Component {
                     ref={(popupDialog) => { this.popupDialog = popupDialog; }}
                     dialogAnimation={slideAnimation}
                     onDismissed={() => this.setState({ selectedColumn: null })}
-                    height={155}
+                    height={170}
                     containerStyle={{ justifyContent: 'flex-end' }}
                 >
                     <List containerStyle={{ marginTop: 0 }}>

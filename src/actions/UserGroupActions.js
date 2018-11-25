@@ -64,11 +64,14 @@ export const retriveTeacher = () => {
 };
 
 export const addUser = (user, userData) => {
+    console.log('addUser', user);
     return (dispatch) => {
         postMethod(
             'users',
             'Fehler beim Speichern des Benutzers',
             data => {
+    console.log('data', data);
+
                 if (user.role === 'parent') {
                     postMethod(
                         `users/${user.id ? user.id : data.id}/children`,

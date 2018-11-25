@@ -254,7 +254,8 @@ class DokumentList extends Component {
                             })}
                             containerStyle={styles.containerFormInputStyle}
                             placeholderTextColor='#828080'
-                            inputStyle={styles.formInputFieldStyle} />
+                            inputStyle={styles.formInputFieldStyle} 
+                            underlineColorAndroid='#a09f9f' />
 
                         <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20, marginRight: 20 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
