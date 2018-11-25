@@ -88,7 +88,6 @@ class UserList extends Component {
 }
 
 const mapStateToProps = state => {
-    console.log('state', state.auth);
     return {
         userData: state.home.userData,
         workSpace: state.auth.workSpace
